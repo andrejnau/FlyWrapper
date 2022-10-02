@@ -1,0 +1,7 @@
+if (BUILD_SAMPLES)
+    add_subdirectory(Apps)
+endif()
+add_subdirectory(Modules)
+if (NOT IOS_OR_TVOS)
+    add_subdirectory(Tools)
+endif()
