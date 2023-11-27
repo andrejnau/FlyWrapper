@@ -1,8 +1,10 @@
 #pragma once
-#include <memory>
-#include <array>
+#include "Instance/BaseTypes.h"
+
 #include <gli/format.hpp>
-#include <Instance/BaseTypes.h>
+
+#include <array>
+#include <memory>
 
 class Resource;
 class RenderCommandList;

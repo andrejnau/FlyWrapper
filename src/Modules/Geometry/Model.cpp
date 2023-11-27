@@ -6,12 +6,10 @@ Model::Model(RenderDevice& device, RenderCommandList& command_list, const std::s
     , ia(device, command_list, meshes)
     , m_cache(device, command_list)
 {
-    for (auto & mesh : meshes)
-    {
+    for (auto& mesh : meshes) {
         materials.emplace_back(m_cache, mesh.material, mesh.textures);
 
-        for (const auto& pos : mesh.positions)
-        {
+        for (const auto& pos : mesh.positions) {
             bound_box.x_min = std::min(bound_box.x_min, pos.x);
             bound_box.x_max = std::max(bound_box.x_max, pos.x);
             bound_box.y_min = std::min(bound_box.y_min, pos.y);

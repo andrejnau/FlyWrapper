@@ -1,24 +1,23 @@
 #pragma once
 
-#include <memory>
-#include "Geometry/IMesh.h"
 #include "Geometry/IABuffer.h"
-#include <Texture/TextureLoader.h>
-#include <Texture/TextureCache.h>
+#include "Geometry/IMesh.h"
+#include "Texture/TextureCache.h"
+#include "Texture/TextureLoader.h"
 
-struct MeshRange
-{
+#include <memory>
+
+struct MeshRange {
     size_t id = 0;
     uint32_t index_count = 0;
     uint32_t start_index_location = 0;
     int32_t base_vertex_location = 0;
 };
 
-class MergedMesh
-{
+class MergedMesh {
 public:
     MergedMesh(const std::vector<IMesh>& meshes);
-    
+
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texcoords;
@@ -29,13 +28,11 @@ public:
     std::vector<MeshRange> ranges;
 };
 
-class Material : public IMesh::Material
-{
+class Material : public IMesh::Material {
 public:
     Material(TextureCache& cache, const IMesh::Material& material, std::vector<TextureInfo>& textures);
 
-    struct
-    {
+    struct {
         std::shared_ptr<Resource> albedo;
         std::shared_ptr<Resource> normal;
         std::shared_ptr<Resource> roughness;
@@ -46,9 +43,9 @@ public:
     } texture;
 };
 
-class IAMergedMesh
-{
+class IAMergedMesh {
     std::unique_ptr<MergedMesh> m_data;
+
 public:
     IAMergedMesh(RenderDevice& device, RenderCommandList& command_list, std::vector<IMesh>& meshes);
 
@@ -60,6 +57,7 @@ public:
     IAVertexBuffer bones_count;
     IAIndexBuffer indices;
     std::vector<MeshRange> ranges;
+
 private:
     std::map<std::string, std::shared_ptr<Resource>> m_tex_cache;
 };

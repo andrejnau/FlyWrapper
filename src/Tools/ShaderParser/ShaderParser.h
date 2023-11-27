@@ -1,9 +1,9 @@
 #pragma once
-#include <string>
-#include <ShaderReflection/ShaderReflection.h>
+#include "ShaderReflection/ShaderReflection.h"
 
-struct Option
-{
+#include <string>
+
+struct Option {
     std::string mustache_template;
     std::string shader_name;
     std::string assets_path;

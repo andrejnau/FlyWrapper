@@ -1,21 +1,24 @@
 #include "Geometry/ModelLoader.h"
+
 #include "Geometry/Model.h"
-#include <Utilities/SystemUtils.h>
+#include "Utilities/SystemUtils.h"
+
 #include <assimp/DefaultIOStream.h>
 #include <assimp/DefaultIOSystem.h>
 #include <assimp/MemoryIOWrapper.h>
-#include <vector>
-#include <set>
-#include <fstream>
 
-class MyIOSystem : public Assimp::DefaultIOSystem
-{
+#include <fstream>
+#include <set>
+#include <vector>
+
+class MyIOSystem : public Assimp::DefaultIOSystem {
 public:
     Assimp::IOStream* Open(const char* strFile, const char* strMode) override
     {
         FILE* file = fopen(strFile, strMode);
-        if (file == nullptr)
+        if (file == nullptr) {
             return nullptr;
+        }
 
         fseek(file, 0, SEEK_END);
         long size = ftell(file);
@@ -50,7 +53,9 @@ std::string ModelLoader::SplitFilename(const std::string& str)
 
 void ModelLoader::LoadModel(aiPostProcessSteps flags)
 {
-    const aiScene* scene = m_import.ReadFile(m_path, flags & (aiProcess_FlipUVs | aiProcess_FlipWindingOrder | aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_OptimizeMeshes |  aiProcess_CalcTangentSpace));
+    const aiScene* scene = m_import.ReadFile(
+        m_path, flags & (aiProcess_FlipUVs | aiProcess_FlipWindingOrder | aiProcess_Triangulate |
+                         aiProcess_GenSmoothNormals | aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace));
     assert(scene && scene->mFlags != AI_SCENE_FLAGS_INCOMPLETE && scene->mRootNode);
     m_model.GetBones().LoadModel(scene);
     ProcessNode(scene->mRootNode, scene);
@@ -58,14 +63,12 @@ void ModelLoader::LoadModel(aiPostProcessSteps flags)
 
 void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene)
 {
-    for (uint32_t i = 0; i < node->mNumMeshes; ++i)
-    {
+    for (uint32_t i = 0; i < node->mNumMeshes; ++i) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         ProcessMesh(mesh, scene);
     }
 
-    for (uint32_t i = 0; i < node->mNumChildren; ++i)
-    {
+    for (uint32_t i = 0; i < node->mNumChildren; ++i) {
         ProcessNode(node->mChildren[i], scene);
     }
 }
@@ -77,30 +80,28 @@ inline glm::vec4 aiColor4DToVec4(const aiColor4D& x)
 
 bool SkipMesh(aiMesh* mesh, const aiScene* scene)
 {
-    if (mesh->mMaterialIndex >= scene->mNumMaterials)
+    if (mesh->mMaterialIndex >= scene->mNumMaterials) {
         return false;
+    }
     aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
     aiString name;
-    if (!mat->Get(AI_MATKEY_NAME, name) == AI_SUCCESS)
+    if (!mat->Get(AI_MATKEY_NAME, name) == AI_SUCCESS) {
         return false;
-    static std::set<std::string> q = {
-        "16___Default",
-        "Ground_SG"
-    };
+    }
+    static std::set<std::string> q = { "16___Default", "Ground_SG" };
     return q.count(std::string(name.C_Str()));
 }
 
 void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
-    if (SkipMesh(mesh, scene))
+    if (SkipMesh(mesh, scene)) {
         return;
+    }
 
     IMesh cur_mesh = {};
     // Walk through each of the mesh's vertices
-    for (uint32_t i = 0; i < mesh->mNumVertices; ++i)
-    {
-        struct Vertex
-        {
+    for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
+        struct Vertex {
             glm::vec3 position;
             glm::vec3 normal;
             glm::vec2 texcoord;
@@ -108,37 +109,30 @@ void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
             glm::vec3 bitangent;
         } vertex;
 
-        if (mesh->HasPositions())
-        {
+        if (mesh->HasPositions()) {
             vertex.position.x = mesh->mVertices[i].x;
             vertex.position.y = mesh->mVertices[i].y;
             vertex.position.z = mesh->mVertices[i].z;
         }
 
-        if (mesh->HasNormals())
-        {
+        if (mesh->HasNormals()) {
             vertex.normal = aiVector3DToVec3(mesh->mNormals[i]);
         }
 
-        if (mesh->HasTangentsAndBitangents())
-        {
+        if (mesh->HasTangentsAndBitangents()) {
             vertex.tangent = aiVector3DToVec3(mesh->mTangents[i]);
             vertex.bitangent = aiVector3DToVec3(mesh->mBitangents[i]);
 
-            if (glm::dot(glm::cross(vertex.normal, vertex.tangent), vertex.bitangent) < 0.0f)
-            {
+            if (glm::dot(glm::cross(vertex.normal, vertex.tangent), vertex.bitangent) < 0.0f) {
                 vertex.tangent *= -1.0f;
             }
         }
 
         // A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't
         // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-        if (mesh->HasTextureCoords(0))
-        {
+        if (mesh->HasTextureCoords(0)) {
             vertex.texcoord = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-        }
-        else
-        {
+        } else {
             vertex.texcoord = glm::vec2(0.0f, 0.0f);
         }
 
@@ -147,24 +141,23 @@ void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
         cur_mesh.texcoords.push_back(vertex.texcoord);
         cur_mesh.tangents.push_back(vertex.tangent);
     }
-    // Now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
-    for (uint32_t i = 0; i < mesh->mNumFaces; ++i)
-    {
+    // Now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex
+    // indices.
+    for (uint32_t i = 0; i < mesh->mNumFaces; ++i) {
         aiFace face = mesh->mFaces[i];
         // Retrieve all indices of the face and store them in the indices vector
-        for (uint32_t j = 0; j < face.mNumIndices; ++j)
-        {
+        for (uint32_t j = 0; j < face.mNumIndices; ++j) {
             cur_mesh.indices.push_back(face.mIndices[j]);
         }
     }
 
     // Process materials
-    if (mesh->mMaterialIndex >= 0)
-    {
+    if (mesh->mMaterialIndex >= 0) {
         aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
         aiString name;
-        if (mat->Get(AI_MATKEY_NAME, name) == AI_SUCCESS)
+        if (mat->Get(AI_MATKEY_NAME, name) == AI_SUCCESS) {
             cur_mesh.material.name = name.C_Str();
+        }
 
         std::vector<TextureInfo> textures;
         // map_Kd
@@ -180,20 +173,17 @@ void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 
         FindSimilarTextures(cur_mesh.material.name, textures);
 
-        auto comparator = [&](const TextureInfo& lhs, const TextureInfo& rhs)
-        {
+        auto comparator = [&](const TextureInfo& lhs, const TextureInfo& rhs) {
             return std::tie(lhs.type, lhs.path) < std::tie(rhs.type, rhs.path);
         };
 
         std::set<TextureInfo, decltype(comparator)> unique_textures(comparator);
 
-        for (TextureInfo& texture : textures)
-        {
+        for (TextureInfo& texture : textures) {
             unique_textures.insert(texture);
         }
 
-        for (const TextureInfo& texture : unique_textures)
-        {
+        for (const TextureInfo& texture : unique_textures) {
             cur_mesh.textures.push_back(texture);
         }
     }
@@ -205,75 +195,56 @@ void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 void ModelLoader::FindSimilarTextures(const std::string& mat_name, std::vector<TextureInfo>& textures)
 {
     static std::pair<std::string, TextureAssetsType> texture_types[] = {
-        { "albedo",     TextureAssetsType::kAlbedo     },
-        { "_albedo",    TextureAssetsType::kAlbedo     },
-        { "_Albedo",    TextureAssetsType::kAlbedo     },
-        { "_color",     TextureAssetsType::kAlbedo     },
-        { "_diff",      TextureAssetsType::kAlbedo     },
-        { "_diffuse",   TextureAssetsType::kAlbedo     },
-        { "_BaseColor", TextureAssetsType::kAlbedo     },
-        { "_nmap",      TextureAssetsType::kNormal     },
-        { "normal",     TextureAssetsType::kNormal     },
-        { "_normal",    TextureAssetsType::kNormal     },
-        { "_Normal",    TextureAssetsType::kNormal     },
-        { "_rough",     TextureAssetsType::kRoughness  },
-        { "roughness",  TextureAssetsType::kRoughness  },
-        { "_roughness", TextureAssetsType::kRoughness  },
-        { "_Roughness", TextureAssetsType::kRoughness  },
-        { "_gloss",     TextureAssetsType::kGlossiness },
-        { "_metalness", TextureAssetsType::kMetalness  },
-        { "_metallic",  TextureAssetsType::kMetalness  },
-        { "metallic",   TextureAssetsType::kMetalness  },
-        { "_Metallic",  TextureAssetsType::kMetalness  },   
-        { "_ao",        TextureAssetsType::kOcclusion  },
-        { "ao",         TextureAssetsType::kOcclusion  },
-        { "_mask",      TextureAssetsType::kOpacity    },
-        { "_opacity",   TextureAssetsType::kOpacity    },
+        { "albedo", TextureAssetsType::kAlbedo },        { "_albedo", TextureAssetsType::kAlbedo },
+        { "_Albedo", TextureAssetsType::kAlbedo },       { "_color", TextureAssetsType::kAlbedo },
+        { "_diff", TextureAssetsType::kAlbedo },         { "_diffuse", TextureAssetsType::kAlbedo },
+        { "_BaseColor", TextureAssetsType::kAlbedo },    { "_nmap", TextureAssetsType::kNormal },
+        { "normal", TextureAssetsType::kNormal },        { "_normal", TextureAssetsType::kNormal },
+        { "_Normal", TextureAssetsType::kNormal },       { "_rough", TextureAssetsType::kRoughness },
+        { "roughness", TextureAssetsType::kRoughness },  { "_roughness", TextureAssetsType::kRoughness },
+        { "_Roughness", TextureAssetsType::kRoughness }, { "_gloss", TextureAssetsType::kGlossiness },
+        { "_metalness", TextureAssetsType::kMetalness }, { "_metallic", TextureAssetsType::kMetalness },
+        { "metallic", TextureAssetsType::kMetalness },   { "_Metallic", TextureAssetsType::kMetalness },
+        { "_ao", TextureAssetsType::kOcclusion },        { "ao", TextureAssetsType::kOcclusion },
+        { "_mask", TextureAssetsType::kOpacity },        { "_opacity", TextureAssetsType::kOpacity },
     };
     std::set<TextureAssetsType> used;
-    for (auto& cur_texture : textures)
-    {
+    for (auto& cur_texture : textures) {
         used.insert(cur_texture.type);
     }
 
-    if (!used.count(TextureAssetsType::kAlbedo))
-    {
-        for (auto & ext : { ".dds", ".png", ".jpg" })
-        {
+    if (!used.count(TextureAssetsType::kAlbedo)) {
+        for (auto& ext : { ".dds", ".png", ".jpg" }) {
             std::string cur_path = m_directory + "/textures/" + mat_name + "_albedo" + ext;
-            if (std::ifstream(cur_path).good())
-            {
+            if (std::ifstream(cur_path).good()) {
                 textures.push_back({ TextureAssetsType::kAlbedo, cur_path });
             }
             cur_path = m_directory + "/" + "albedo" + ext;
-            if (std::ifstream(cur_path).good())
-            {
+            if (std::ifstream(cur_path).good()) {
                 textures.push_back({ TextureAssetsType::kAlbedo, cur_path });
             }
         }
     }
 
     std::vector<TextureInfo> added_textures;
-    for (auto& from_type : texture_types)
-    {
-        for (auto& cur_texture : textures)
-        {
+    for (auto& from_type : texture_types) {
+        for (auto& cur_texture : textures) {
             std::string path = cur_texture.path;
 
             size_t loc = path.find(from_type.first);
-            if (loc == std::string::npos)
+            if (loc == std::string::npos) {
                 continue;
+            }
 
-            for (auto& to_type : texture_types)
-            {
-                if (used.count(to_type.second))
-                {
+            for (auto& to_type : texture_types) {
+                if (used.count(to_type.second)) {
                     continue;
                 }
                 std::string cur_path = path;
                 cur_path.replace(loc, from_type.first.size(), to_type.first);
-                if (!std::ifstream(cur_path).good())
+                if (!std::ifstream(cur_path).good()) {
                     continue;
+                }
 
                 TextureInfo texture;
                 texture.type = to_type.second;
@@ -287,19 +258,19 @@ void ModelLoader::FindSimilarTextures(const std::string& mat_name, std::vector<T
     textures.insert(textures.end(), added_textures.begin(), added_textures.end());
 }
 
-void ModelLoader::LoadMaterialTextures(aiMaterial* mat, aiTextureType aitype, TextureAssetsType type, std::vector<TextureInfo>& textures)
+void ModelLoader::LoadMaterialTextures(aiMaterial* mat,
+                                       aiTextureType aitype,
+                                       TextureAssetsType type,
+                                       std::vector<TextureInfo>& textures)
 {
-    for (uint32_t i = 0; i < mat->GetTextureCount(aitype); ++i)
-    {
+    for (uint32_t i = 0; i < mat->GetTextureCount(aitype); ++i) {
         aiString texture_name;
         mat->GetTexture(aitype, i, &texture_name);
         std::string texture_path = m_directory + "/" + texture_name.C_Str();
         std::replace(texture_path.begin(), texture_path.end(), '\\', '/');
-        if (!std::ifstream(texture_path).good())
-        {
+        if (!std::ifstream(texture_path).good()) {
             texture_path = texture_path.substr(0, texture_path.rfind('.')) + ".dds";
-            if (!std::ifstream(texture_path).good())
-            {
+            if (!std::ifstream(texture_path).good()) {
                 continue;
             }
         }

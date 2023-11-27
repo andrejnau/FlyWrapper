@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Geometry/Mesh.h"
-#include <Resource/Resource.h>
+#include "Resource/Resource.h"
+
 #include <assimp/scene.h>
-#include <vector>
 #include <glm/glm.hpp>
 
-class Bones
-{
+#include <vector>
+
+class Bones {
 public:
     void LoadModel(const aiScene* scene);
     void ProcessMesh(const aiMesh* mesh, IMesh& cur_mesh);
@@ -29,8 +30,7 @@ private:
     glm::mat4 to_glm(const aiMatrix4x4& mat);
     glm::mat3 to_glm(const aiMatrix3x3& mat);
 
-    struct BoneInfo
-    {
+    struct BoneInfo {
         uint32_t bone_id;
         float bone_weight;
     };

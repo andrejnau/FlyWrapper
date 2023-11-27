@@ -1,21 +1,21 @@
 ﻿#pragma once
-#include <cstddef>
-#include <map>
-#include <string>
-#include <memory>
-#include <vector>
-#include <functional>
-#include "RenderDevice/RenderDevice.h"
 #include "RenderDevice/BufferLayout.h"
+#include "RenderDevice/RenderDevice.h"
 
-template<ShaderType, typename T> class ShaderHolderImpl {};
+#include <cstddef>
+#include <functional>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-template<typename T>
-class ShaderHolderImpl<ShaderType::kPixel, T>
-{
+template <ShaderType, typename T>
+class ShaderHolderImpl {};
+
+template <typename T>
+class ShaderHolderImpl<ShaderType::kPixel, T> {
 public:
-    struct Api : public T
-    {
+    struct Api : public T {
         using T::T;
     } ps;
 
@@ -30,12 +30,10 @@ public:
     }
 };
 
-template<typename T>
-class ShaderHolderImpl<ShaderType::kVertex, T>
-{
+template <typename T>
+class ShaderHolderImpl<ShaderType::kVertex, T> {
 public:
-    struct Api : public T
-    {
+    struct Api : public T {
         using T::T;
     } vs;
 
@@ -50,12 +48,10 @@ public:
     }
 };
 
-template<typename T>
-class ShaderHolderImpl<ShaderType::kGeometry, T>
-{
+template <typename T>
+class ShaderHolderImpl<ShaderType::kGeometry, T> {
 public:
-    struct Api : public T
-    {
+    struct Api : public T {
         using T::T;
     } gs;
 
@@ -70,12 +66,10 @@ public:
     }
 };
 
-template<typename T>
-class ShaderHolderImpl<ShaderType::kAmplification, T>
-{
+template <typename T>
+class ShaderHolderImpl<ShaderType::kAmplification, T> {
 public:
-    struct Api : public T
-    {
+    struct Api : public T {
         using T::T;
     } as;
 
@@ -90,12 +84,10 @@ public:
     }
 };
 
-template<typename T>
-class ShaderHolderImpl<ShaderType::kMesh, T>
-{
+template <typename T>
+class ShaderHolderImpl<ShaderType::kMesh, T> {
 public:
-    struct Api : public T
-    {
+    struct Api : public T {
         using T::T;
     } ms;
 
@@ -110,12 +102,10 @@ public:
     }
 };
 
-template<typename T>
-class ShaderHolderImpl<ShaderType::kCompute, T>
-{
+template <typename T>
+class ShaderHolderImpl<ShaderType::kCompute, T> {
 public:
-    struct Api : public T
-    {
+    struct Api : public T {
         using T::T;
     } cs;
 
@@ -130,12 +120,10 @@ public:
     }
 };
 
-template<typename T>
-class ShaderHolderImpl<ShaderType::kLibrary, T>
-{
+template <typename T>
+class ShaderHolderImpl<ShaderType::kLibrary, T> {
 public:
-    struct Api : public T
-    {
+    struct Api : public T {
         using T::T;
     } lib;
 
@@ -150,17 +138,19 @@ public:
     }
 };
 
-template<ShaderType T, ShaderType... Ts>
+template <ShaderType T, ShaderType... Ts>
 constexpr bool contains()
 {
     return ((T == Ts) || ...);
 }
 
-template<typename T> class ShaderHolder : public ShaderHolderImpl<T::type, T> { using ShaderHolderImpl<T::type, T>::ShaderHolderImpl; };
+template <typename T>
+class ShaderHolder : public ShaderHolderImpl<T::type, T> {
+    using ShaderHolderImpl<T::type, T>::ShaderHolderImpl;
+};
 
-template<typename ... Args>
-class ProgramHolder : public ShaderHolder<Args>...
-{
+template <typename... Args>
+class ProgramHolder : public ShaderHolder<Args>... {
 public:
     ProgramHolder(RenderDevice& device)
         : ShaderHolder<Args>(device)...
@@ -169,7 +159,7 @@ public:
         CompileShaders();
     }
 
-    template<typename Setup>
+    template <typename Setup>
     ProgramHolder(RenderDevice& device, const Setup& setup)
         : ShaderHolder<Args>(device)...
         , m_device(device)
@@ -178,7 +168,7 @@ public:
         CompileShaders();
     }
 
-    operator std::shared_ptr<Program>& ()
+    operator std::shared_ptr<Program>&()
     {
         return m_program;
     }
@@ -197,9 +187,12 @@ private:
         return true;
     }
 
-    template<typename ... ShadowsArgs> void DevNull(ShadowsArgs ... args) {}
+    template <typename... ShadowsArgs>
+    void DevNull(ShadowsArgs... args)
+    {
+    }
 
-    template<typename... ShadowsArgs>
+    template <typename... ShadowsArgs>
     void EnumerateShader()
     {
         DevNull(ApplyCallback<ShadowsArgs>()...);
@@ -208,7 +201,7 @@ private:
     void CompileShaders()
     {
         EnumerateShader<Args...>();
-        m_program = m_device.CreateProgram({ static_cast<ShaderHolder<Args>&>(*this).GetApi().shader ... });
+        m_program = m_device.CreateProgram({ static_cast<ShaderHolder<Args>&>(*this).GetApi().shader... });
     }
 
     RenderDevice& m_device;

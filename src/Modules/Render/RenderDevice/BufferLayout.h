@@ -1,16 +1,14 @@
 #pragma once
 #include "RenderDevice/RenderDevice.h"
 
-struct BufferLayout
-{
+struct BufferLayout {
     size_t dst_buffer_size;
     std::vector<size_t> data_size;
     std::vector<size_t> src_offset;
     std::vector<size_t> dst_offset;
 };
 
-class ViewProvider : public DeferredView
-{
+class ViewProvider : public DeferredView {
 public:
     ViewProvider(RenderDevice& device, const uint8_t* src_data, BufferLayout& layout);
     std::shared_ptr<ResourceLazyViewDesc> GetView(RenderCommandList& command_list) override;
@@ -27,9 +25,8 @@ private:
     std::shared_ptr<ResourceLazyViewDesc> m_last_view;
 };
 
-template<typename T>
-class ConstantBuffer : public T
-{
+template <typename T>
+class ConstantBuffer : public T {
 public:
     ConstantBuffer(RenderDevice& device, BufferLayout& layout)
     {
@@ -37,7 +34,7 @@ public:
         m_view_provider = std::make_shared<ViewProvider>(device, reinterpret_cast<const uint8_t*>(&data), layout);
     }
 
-    operator std::shared_ptr<DeferredView>& ()
+    operator std::shared_ptr<DeferredView>&()
     {
         return m_view_provider;
     }

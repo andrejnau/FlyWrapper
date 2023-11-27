@@ -1,9 +1,9 @@
 #pragma once
 #include "TextureLoader.h"
+
 #include <glm/glm.hpp>
 
-class TextureCache
-{
+class TextureCache {
 public:
     TextureCache(RenderDevice& device, RenderCommandList& command_list);
     std::shared_ptr<Resource> Load(const std::string& path);
@@ -14,15 +14,17 @@ private:
     RenderCommandList& m_command_list;
     std::map<std::string, std::shared_ptr<Resource>> m_cache;
 
-    struct glm_key
-    {
-        glm_key(glm::vec4 val) : val(val) {}
+    struct glm_key {
+        glm_key(glm::vec4 val)
+            : val(val)
+        {
+        }
         bool operator<(const glm_key& oth) const
         {
-            for (size_t i = 0; i < val.length(); ++i)
-            {
-                if (val[i] == oth.val[i])
+            for (size_t i = 0; i < val.length(); ++i) {
+                if (val[i] == oth.val[i]) {
                     continue;
+                }
                 return val[i] < oth.val[i];
             }
             return false;

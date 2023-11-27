@@ -1,11 +1,13 @@
-#include <AppBox/AppBox.h>
-#include <AppBox/ArgsParser.h>
-#include <Geometry/Geometry.h>
-#include <Camera/Camera.h>
-#include <Utilities/FormatHelper.h>
-#include <ProgramRef/PixelShader.h>
-#include <ProgramRef/VertexShader.h>
+#include "AppBox/AppBox.h"
+#include "AppBox/ArgsParser.h"
+#include "Camera/Camera.h"
+#include "Geometry/Geometry.h"
+#include "ProgramRef/PixelShader.h"
+#include "ProgramRef/VertexShader.h"
+#include "Utilities/FormatHelper.h"
+
 #include <glm/gtx/transform.hpp>
+
 #include <stdexcept>
 
 int main(int argc, char* argv[])
@@ -15,15 +17,17 @@ int main(int argc, char* argv[])
     AppRect rect = app.GetAppRect();
 
     std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width, rect.height);
-    if (!device->IsVariableRateShadingSupported())
+    if (!device->IsVariableRateShadingSupported()) {
         throw std::runtime_error("Variable rate shading is not supported");
+    }
     app.SetGpuName(device->GetGpuName());
 
-    auto dsv = device->CreateTexture(BindFlag::kDepthStencil, gli::format::FORMAT_D32_SFLOAT_PACK32, 1, rect.width, rect.height, 1);
+    auto dsv = device->CreateTexture(BindFlag::kDepthStencil, gli::format::FORMAT_D32_SFLOAT_PACK32, 1, rect.width,
+                                     rect.height, 1);
     auto sampler = device->CreateSampler({
         SamplerFilter::kAnisotropic,
         SamplerTextureAddressMode::kWrap,
-        SamplerComparisonFunc::kNever
+        SamplerComparisonFunc::kNever,
     });
 
     ViewDesc sampler_view_desc = {};
@@ -39,8 +43,9 @@ int main(int argc, char* argv[])
 
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();
 
-    Model model(*device, *upload_command_list, ASSETS_PATH"model/export3dcoat/export3dcoat.obj");
-    model.matrix = glm::scale(glm::vec3(0.1f)) * glm::translate(glm::vec3(0.0f, 30.0f, 0.0f)) * glm::rotate(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    Model model(*device, *upload_command_list, ASSETS_PATH "model/export3dcoat/export3dcoat.obj");
+    model.matrix = glm::scale(glm::vec3(0.1f)) * glm::translate(glm::vec3(0.0f, 30.0f, 0.0f)) *
+                   glm::rotate(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     ProgramHolder<PixelShader, VertexShader> program(*device);
     program.vs.cbuffer.ConstantBuf.model = glm::transpose(model.matrix);
@@ -52,17 +57,18 @@ int main(int argc, char* argv[])
     uint32_t tile_size = device->GetShadingRateImageTileSize();
     uint32_t shading_rate_width = (rect.width + tile_size - 1) / tile_size;
     uint32_t shading_rate_height = (rect.height + tile_size - 1) / tile_size;
-    for (uint32_t y = 0; y < shading_rate_height; ++y)
-    {
-        for (uint32_t x = 0; x < shading_rate_width; ++x)
-        {
-            if (x > (shading_rate_width / 2))
+    for (uint32_t y = 0; y < shading_rate_height; ++y) {
+        for (uint32_t x = 0; x < shading_rate_width; ++x) {
+            if (x > (shading_rate_width / 2)) {
                 shading_rate.emplace_back(ShadingRate::k4x4);
-            else
+            } else {
                 shading_rate.emplace_back(ShadingRate::k1x1);
+            }
         }
     }
-    std::shared_ptr<Resource> shading_rate_texture = device->CreateTexture(BindFlag::kShadingRateSource | BindFlag::kCopyDest, gli::format::FORMAT_R8_UINT_PACK8, 1, shading_rate_width, shading_rate_height);
+    std::shared_ptr<Resource> shading_rate_texture =
+        device->CreateTexture(BindFlag::kShadingRateSource | BindFlag::kCopyDest, gli::format::FORMAT_R8_UINT_PACK8, 1,
+                              shading_rate_width, shading_rate_height);
     size_t num_bytes = 0;
     size_t row_bytes = 0;
     GetFormatInfo(shading_rate_width, shading_rate_height, gli::format::FORMAT_R8_UINT_PACK8, num_bytes, row_bytes);
@@ -77,8 +83,7 @@ int main(int argc, char* argv[])
     std::shared_ptr<View> shading_rate_view = device->CreateView(shading_rate_texture, shading_rate_view_desc);
 
     std::vector<std::shared_ptr<RenderCommandList>> command_lists;
-    for (uint32_t i = 0; i < settings.frame_count; ++i)
-    {
+    for (uint32_t i = 0; i < settings.frame_count; ++i) {
         RenderPassBeginDesc render_pass_desc = {};
         render_pass_desc.colors[0].texture = device->GetBackBuffer(i);
         render_pass_desc.colors[0].clear_color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -97,8 +102,7 @@ int main(int argc, char* argv[])
         command_list->RSSetShadingRateImage(shading_rate_view);
 
         command_list->BeginRenderPass(render_pass_desc);
-        for (auto& range : model.ia.ranges)
-        {
+        for (auto& range : model.ia.ranges) {
             auto& material = model.GetMaterial(range.id);
             command_list->Attach(program.ps.srv.albedoMap, material.texture.albedo);
             command_list->DrawIndexed(range.index_count, 1, range.start_index_location, range.base_vertex_location, 0);
@@ -109,8 +113,7 @@ int main(int argc, char* argv[])
         command_lists.emplace_back(command_list);
     }
 
-    while (!app.PollEvents())
-    {
+    while (!app.PollEvents()) {
         device->ExecuteCommandLists({ command_lists[device->GetFrameIndex()] });
         device->Present();
     }

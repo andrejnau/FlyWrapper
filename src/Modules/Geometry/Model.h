@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Geometry/Mesh.h"
 #include "Geometry/Bones.h"
+#include "Geometry/Mesh.h"
 #include "Geometry/ModelLoader.h"
-#include <Texture/TextureCache.h>
+#include "Texture/TextureCache.h"
 
-struct BoundBox
-{
+struct BoundBox {
     BoundBox()
     {
         x_min = y_min = z_min = std::numeric_limits<float>::max();
@@ -17,8 +16,7 @@ struct BoundBox
     float x_max, y_max, z_max;
 };
 
-class Model : public IModel
-{
+class Model : public IModel {
 public:
     Model(RenderDevice& device, RenderCommandList& command_list, const std::string& file, uint32_t flags = ~0);
     virtual void AddMesh(const IMesh& mesh) override;
@@ -33,8 +31,7 @@ public:
     std::shared_ptr<Resource> ibl_rtv;
     std::shared_ptr<Resource> ibl_dsv;
 
-    struct Output
-    {
+    struct Output {
         std::shared_ptr<Resource> irradince;
         std::shared_ptr<Resource> prefilter;
     } ibl;

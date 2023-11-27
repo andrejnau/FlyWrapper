@@ -1,10 +1,9 @@
 #pragma once
-#include <RenderCommandList/RenderCommandList.h>
-#include <Device/Device.h>
-#include <ObjectCache/ObjectCache.h>
+#include "Device/Device.h"
+#include "ObjectCache/ObjectCache.h"
+#include "RenderCommandList/RenderCommandList.h"
 
-struct LazyResourceBarrierDesc
-{
+struct LazyResourceBarrierDesc {
     std::shared_ptr<Resource> resource;
     ResourceState state;
     uint32_t base_mip_level = 0;
@@ -15,8 +14,7 @@ struct LazyResourceBarrierDesc
 
 constexpr bool kUseFakeClose = true;
 
-class RenderCommandListImpl : public RenderCommandList
-{
+class RenderCommandListImpl : public RenderCommandList {
 public:
     RenderCommandListImpl(Device& device, ObjectCache& object_cache, CommandListType type);
     const std::shared_ptr<CommandList>& GetCommandList();
@@ -26,7 +24,9 @@ public:
 
     void Reset() override;
     void Close() override;
-    void Attach(const BindKey& bind_key, const std::shared_ptr<Resource>& resource = {}, const LazyViewDesc& view_desc = {}) override;
+    void Attach(const BindKey& bind_key,
+                const std::shared_ptr<Resource>& resource = {},
+                const LazyViewDesc& view_desc = {}) override;
     void Attach(const BindKey& bind_key, const std::shared_ptr<DeferredView>& view) override;
     void Attach(const BindKey& bind_key, const std::shared_ptr<View>& view) override;
     void SetRasterizeState(const RasterizerDesc& desc) override;
@@ -38,23 +38,26 @@ public:
     void BeginEvent(const std::string& name) override;
     void EndEvent() override;
     void Draw(uint32_t vertex_count, uint32_t instance_count, uint32_t first_vertex, uint32_t first_instance) override;
-    void DrawIndexed(uint32_t index_count, uint32_t instance_count, uint32_t first_index, int32_t vertex_offset, uint32_t first_instance) override;
+    void DrawIndexed(uint32_t index_count,
+                     uint32_t instance_count,
+                     uint32_t first_index,
+                     int32_t vertex_offset,
+                     uint32_t first_instance) override;
     void DrawIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset) override;
-    void DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset) override;
-    void DrawIndirectCount(
-        const std::shared_ptr<Resource>& argument_buffer,
-        uint64_t argument_buffer_offset,
-        const std::shared_ptr<Resource>& count_buffer,
-        uint64_t count_buffer_offset,
-        uint32_t max_draw_count,
-        uint32_t stride) override;
-    void DrawIndexedIndirectCount(
-        const std::shared_ptr<Resource>& argument_buffer,
-        uint64_t argument_buffer_offset,
-        const std::shared_ptr<Resource>& count_buffer,
-        uint64_t count_buffer_offset,
-        uint32_t max_draw_count,
-        uint32_t stride) override;
+    void DrawIndexedIndirect(const std::shared_ptr<Resource>& argument_buffer,
+                             uint64_t argument_buffer_offset) override;
+    void DrawIndirectCount(const std::shared_ptr<Resource>& argument_buffer,
+                           uint64_t argument_buffer_offset,
+                           const std::shared_ptr<Resource>& count_buffer,
+                           uint64_t count_buffer_offset,
+                           uint32_t max_draw_count,
+                           uint32_t stride) override;
+    void DrawIndexedIndirectCount(const std::shared_ptr<Resource>& argument_buffer,
+                                  uint64_t argument_buffer_offset,
+                                  const std::shared_ptr<Resource>& count_buffer,
+                                  uint64_t count_buffer_offset,
+                                  uint32_t max_draw_count,
+                                  uint32_t stride) override;
     void Dispatch(uint32_t thread_group_count_x, uint32_t thread_group_count_y, uint32_t thread_group_count_z) override;
     void DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset) override;
     void DispatchMesh(uint32_t thread_group_count_x) override;
@@ -64,26 +67,50 @@ public:
     void IASetIndexBuffer(const std::shared_ptr<Resource>& resource, gli::format format) override;
     void IASetVertexBuffer(uint32_t slot, const std::shared_ptr<Resource>& resource) override;
     void RSSetShadingRateImage(const std::shared_ptr<View>& view) override;
-    void BuildBottomLevelAS(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags = BuildAccelerationStructureFlags::kNone) override;
-    void BuildTopLevelAS(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, const std::vector<std::pair<std::shared_ptr<Resource>, glm::mat4>>& geometry, BuildAccelerationStructureFlags flags = BuildAccelerationStructureFlags::kNone) override;
-    void CopyAccelerationStructure(const std::shared_ptr<Resource>& src, const std::shared_ptr<Resource>& dst, CopyAccelerationStructureMode mode) override;
-    void CopyBuffer(const std::shared_ptr<Resource>& src_buffer, const std::shared_ptr<Resource>& dst_buffer,
-                            const std::vector<BufferCopyRegion>& regions) override;
-    void CopyBufferToTexture(const std::shared_ptr<Resource>& src_buffer, const std::shared_ptr<Resource>& dst_texture,
-                                     const std::vector<BufferToTextureCopyRegion>& regions) override;
-    void CopyTexture(const std::shared_ptr<Resource>& src_texture, const std::shared_ptr<Resource>& dst_texture,
-                             const std::vector<TextureCopyRegion>& regions) override;
-    void UpdateSubresource(const std::shared_ptr<Resource>& resource, uint32_t subresource, const void* data, uint32_t row_pitch = 0, uint32_t depth_pitch = 0) override;
+    void BuildBottomLevelAS(const std::shared_ptr<Resource>& src,
+                            const std::shared_ptr<Resource>& dst,
+                            const std::vector<RaytracingGeometryDesc>& descs,
+                            BuildAccelerationStructureFlags flags = BuildAccelerationStructureFlags::kNone) override;
+    void BuildTopLevelAS(const std::shared_ptr<Resource>& src,
+                         const std::shared_ptr<Resource>& dst,
+                         const std::vector<std::pair<std::shared_ptr<Resource>, glm::mat4>>& geometry,
+                         BuildAccelerationStructureFlags flags = BuildAccelerationStructureFlags::kNone) override;
+    void CopyAccelerationStructure(const std::shared_ptr<Resource>& src,
+                                   const std::shared_ptr<Resource>& dst,
+                                   CopyAccelerationStructureMode mode) override;
+    void CopyBuffer(const std::shared_ptr<Resource>& src_buffer,
+                    const std::shared_ptr<Resource>& dst_buffer,
+                    const std::vector<BufferCopyRegion>& regions) override;
+    void CopyBufferToTexture(const std::shared_ptr<Resource>& src_buffer,
+                             const std::shared_ptr<Resource>& dst_texture,
+                             const std::vector<BufferToTextureCopyRegion>& regions) override;
+    void CopyTexture(const std::shared_ptr<Resource>& src_texture,
+                     const std::shared_ptr<Resource>& dst_texture,
+                     const std::vector<TextureCopyRegion>& regions) override;
+    void UpdateSubresource(const std::shared_ptr<Resource>& resource,
+                           uint32_t subresource,
+                           const void* data,
+                           uint32_t row_pitch = 0,
+                           uint32_t depth_pitch = 0) override;
     uint64_t& GetFenceValue() override;
 
 private:
     void BufferBarrier(const std::shared_ptr<Resource>& resource, ResourceState state);
     void ViewBarrier(const std::shared_ptr<View>& view, ResourceState state);
-    void ImageBarrier(const std::shared_ptr<Resource>& resource, uint32_t base_mip_level, uint32_t level_count, uint32_t base_array_layer, uint32_t layer_count, ResourceState state);
+    void ImageBarrier(const std::shared_ptr<Resource>& resource,
+                      uint32_t base_mip_level,
+                      uint32_t level_count,
+                      uint32_t base_array_layer,
+                      uint32_t layer_count,
+                      ResourceState state);
     void OnAttachSRV(const BindKey& bind_key, const std::shared_ptr<View>& view);
     void OnAttachUAV(const BindKey& bind_key, const std::shared_ptr<View>& view);
     void SetBinding(const BindKey& bind_key, const std::shared_ptr<View>& view);
-    void UpdateDefaultSubresource(const std::shared_ptr<Resource>& resource, uint32_t subresource, const void* data, uint32_t row_pitch, uint32_t depth_pitch);
+    void UpdateDefaultSubresource(const std::shared_ptr<Resource>& resource,
+                                  uint32_t subresource,
+                                  const void* data,
+                                  uint32_t row_pitch,
+                                  uint32_t depth_pitch);
     void Apply();
     void ApplyPipeline();
     void ApplyBindingSet();

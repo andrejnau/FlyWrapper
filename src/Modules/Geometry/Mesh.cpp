@@ -1,5 +1,7 @@
 #include "Geometry/Mesh.h"
-#include <Texture/TextureLoader.h>
+
+#include "Texture/TextureLoader.h"
+
 #include <iterator>
 
 MergedMesh::MergedMesh(const std::vector<IMesh>& meshes)
@@ -11,8 +13,7 @@ MergedMesh::MergedMesh(const std::vector<IMesh>& meshes)
     size_t count_non_empty_bones_offset = 0;
     size_t count_non_empty_bones_count = 0;
 
-    for (const auto & mesh : meshes)
-    {
+    for (const auto& mesh : meshes) {
         count_non_empty_positions += !mesh.positions.empty();
         count_non_empty_normals += !mesh.normals.empty();
         count_non_empty_texcoords += !mesh.texcoords.empty();
@@ -23,25 +24,30 @@ MergedMesh::MergedMesh(const std::vector<IMesh>& meshes)
 
     size_t cur_size = 0;
     size_t id = 0;
-    for (const auto & mesh : meshes)
-    {
+    for (const auto& mesh : meshes) {
         // TODO: fix me, workaround for Vulkan::minStorageBufferOffsetAlignment
-        while ((indices.size() * sizeof(uint32_t)) % 16 != 0)
+        while ((indices.size() * sizeof(uint32_t)) % 16 != 0) {
             indices.emplace_back(0);
-        while ((texcoords.size() * sizeof(glm::vec2)) % 16 != 0)
-        {
-            if (!positions.empty())
+        }
+        while ((texcoords.size() * sizeof(glm::vec2)) % 16 != 0) {
+            if (!positions.empty()) {
                 positions.emplace_back();
-            if (!normals.empty())
+            }
+            if (!normals.empty()) {
                 normals.emplace_back();
-            if (!texcoords.empty())
+            }
+            if (!texcoords.empty()) {
                 texcoords.emplace_back();
-            if (!tangents.empty())
+            }
+            if (!tangents.empty()) {
                 tangents.emplace_back();
-            if (!bones_offset.empty())
+            }
+            if (!bones_offset.empty()) {
                 bones_offset.emplace_back();
-            if (!bones_count.empty())
+            }
+            if (!bones_count.empty()) {
                 bones_count.emplace_back();
+            }
             ++cur_size;
         }
 
@@ -59,38 +65,32 @@ MergedMesh::MergedMesh(const std::vector<IMesh>& meshes)
         max_size = std::max(max_size, mesh.bones_offset.size());
         max_size = std::max(max_size, mesh.bones_count.size());
 
-        if (count_non_empty_positions)
-        {
+        if (count_non_empty_positions) {
             std::copy(mesh.positions.begin(), mesh.positions.end(), back_inserter(positions));
             positions.resize(cur_size + max_size);
         }
 
-        if (count_non_empty_normals)
-        {
+        if (count_non_empty_normals) {
             std::copy(mesh.normals.begin(), mesh.normals.end(), back_inserter(normals));
             normals.resize(cur_size + max_size);
         }
 
-        if (count_non_empty_texcoords)
-        {
+        if (count_non_empty_texcoords) {
             std::copy(mesh.texcoords.begin(), mesh.texcoords.end(), back_inserter(texcoords));
             texcoords.resize(cur_size + max_size);
         }
 
-        if (count_non_empty_tangents)
-        {
+        if (count_non_empty_tangents) {
             std::copy(mesh.tangents.begin(), mesh.tangents.end(), back_inserter(tangents));
             tangents.resize(cur_size + max_size);
         }
 
-        if (count_non_empty_bones_offset)
-        {
+        if (count_non_empty_bones_offset) {
             std::copy(mesh.bones_offset.begin(), mesh.bones_offset.end(), back_inserter(bones_offset));
             bones_offset.resize(cur_size + max_size);
         }
 
-        if (count_non_empty_bones_count)
-        {
+        if (count_non_empty_bones_count) {
             std::copy(mesh.bones_count.begin(), mesh.bones_count.end(), back_inserter(bones_count));
             bones_count.resize(cur_size + max_size);
         }
@@ -100,7 +100,7 @@ MergedMesh::MergedMesh(const std::vector<IMesh>& meshes)
     }
 }
 
-IAMergedMesh::IAMergedMesh(RenderDevice & device, RenderCommandList& command_list, std::vector<IMesh>& meshes)
+IAMergedMesh::IAMergedMesh(RenderDevice& device, RenderCommandList& command_list, std::vector<IMesh>& meshes)
     : m_data(std::make_unique<MergedMesh>(meshes))
     , positions(device, command_list, m_data->positions)
     , normals(device, command_list, m_data->normals)
@@ -117,11 +117,9 @@ IAMergedMesh::IAMergedMesh(RenderDevice & device, RenderCommandList& command_lis
 Material::Material(TextureCache& cache, const IMesh::Material& material, std::vector<TextureInfo>& textures)
     : IMesh::Material(material)
 {
-    for (size_t i = 0; i < textures.size(); ++i)
-    {
+    for (size_t i = 0; i < textures.size(); ++i) {
         auto tex = cache.Load(textures[i].path);
-        switch (textures[i].type)
-        {
+        switch (textures[i].type) {
         case TextureAssetsType::kAlbedo:
             texture.albedo = tex;
             break;
@@ -146,14 +144,19 @@ Material::Material(TextureCache& cache, const IMesh::Material& material, std::ve
         }
     }
 
-    if (!texture.albedo)
+    if (!texture.albedo) {
         texture.albedo = cache.CreateTextuteStab(glm::vec4(0.0));
-    if (!texture.roughness && !texture.glossiness)
+    }
+    if (!texture.roughness && !texture.glossiness) {
         texture.roughness = cache.CreateTextuteStab(glm::vec4(1.0));
-    if (!texture.metalness)
+    }
+    if (!texture.metalness) {
         texture.metalness = cache.CreateTextuteStab(glm::vec4(0.0));
-    if (!texture.occlusion)
+    }
+    if (!texture.occlusion) {
         texture.occlusion = cache.CreateTextuteStab(glm::vec4(1.0));
-    if (!texture.opacity)
+    }
+    if (!texture.opacity) {
         texture.opacity = cache.CreateTextuteStab(glm::vec4(1.0));
+    }
 }

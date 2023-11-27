@@ -1,7 +1,7 @@
 #pragma once
 
+#include "RenderCommandList/RenderCommandList.h"
+#include "RenderDevice/RenderDevice.h"
 #include "Texture/TextureInfo.h"
-#include <RenderDevice/RenderDevice.h>
-#include <RenderCommandList/RenderCommandList.h>
 
 std::shared_ptr<Resource> CreateTexture(RenderDevice& device, RenderCommandList& command_list, const std::string& path);

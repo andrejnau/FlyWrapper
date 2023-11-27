@@ -1,34 +1,37 @@
 #pragma once
+#include "ApiType/ApiType.h"
+#include "AppBox/Settings.h"
+#include "Instance/Instance.h"
+#include "ObjectCache/ObjectCache.h"
+#include "RenderCommandList/RenderCommandList.h"
 #include "RenderDevice/RenderDevice.h"
-#include <RenderDevice/RenderTypes.h>
-#include <Instance/Instance.h>
-#include <AppBox/Settings.h>
-#include <memory>
-#include <ApiType/ApiType.h>
+#include "RenderDevice/RenderTypes.h"
+#include "Resource/Resource.h"
 
-#include <memory>
+#include <gli/gli.hpp>
+#include <glm/glm.hpp>
+
 #include <array>
+#include <memory>
 #include <set>
 
-#include <Resource/Resource.h>
-#include <glm/glm.hpp>
-#include <gli/gli.hpp>
-
-#include <RenderCommandList/RenderCommandList.h>
-#include <RenderDevice/RenderDevice.h>
-#include <ObjectCache/ObjectCache.h>
-
-class RenderDeviceImpl : public RenderDevice
-{
+class RenderDeviceImpl : public RenderDevice {
 public:
     RenderDeviceImpl(const Settings& settings, WindowHandle window, uint32_t width, uint32_t height);
     ~RenderDeviceImpl();
 
     std::shared_ptr<RenderCommandList> CreateRenderCommandList(CommandListType type) override;
-    std::shared_ptr<Resource> CreateTexture(uint32_t bind_flag, gli::format format, uint32_t sample_count, int width, int height, int depth, int mip_levels) override;
+    std::shared_ptr<Resource> CreateTexture(uint32_t bind_flag,
+                                            gli::format format,
+                                            uint32_t sample_count,
+                                            int width,
+                                            int height,
+                                            int depth,
+                                            int mip_levels) override;
     std::shared_ptr<Resource> CreateBuffer(uint32_t bind_flag, uint32_t buffer_size, MemoryType memory_type) override;
     std::shared_ptr<Resource> CreateSampler(const SamplerDesc& desc) override;
-    std::shared_ptr<Resource> CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags) override;
+    std::shared_ptr<Resource> CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs,
+                                                  BuildAccelerationStructureFlags flags) override;
     std::shared_ptr<Resource> CreateTopLevelAS(uint32_t instance_count, BuildAccelerationStructureFlags flags) override;
     std::shared_ptr<View> CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc) override;
     std::shared_ptr<Shader> CompileShader(const ShaderDesc& desc) override;

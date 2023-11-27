@@ -2,8 +2,7 @@
 
 #include <string>
 
-enum class TextureAssetsType
-{
+enum class TextureAssetsType {
     kAlbedo,
     kNormal,
     kRoughness,
@@ -13,8 +12,7 @@ enum class TextureAssetsType
     kOpacity,
 };
 
-struct TextureInfo
-{
+struct TextureInfo {
     TextureAssetsType type;
     std::string path;
 };

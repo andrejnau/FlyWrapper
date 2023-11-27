@@ -1,9 +1,10 @@
 #include "AppBox/AppBox.h"
 #include "AppBox/ArgsParser.h"
-#include "RenderDevice/RenderDevice.h"
-#include "Texture/TextureLoader.h"
 #include "ProgramRef/Noise.h"
 #include "ProgramRef/Task.h"
+#include "RenderDevice/RenderDevice.h"
+#include "Texture/TextureLoader.h"
+
 #include <chrono>
 
 float GetTime()
@@ -27,10 +28,13 @@ int main(int argc, char* argv[])
 
     const static int uavWidth = 512;
     const static int uavHeight = 512;
-    std::shared_ptr<Resource> uav = device->CreateTexture(BindFlag::kUnorderedAccess | BindFlag::kShaderResource | BindFlag::kCopySource,
-                                                          device->GetFormat(), 1, uavWidth, uavHeight);
+    std::shared_ptr<Resource> uav =
+        device->CreateTexture(BindFlag::kUnorderedAccess | BindFlag::kShaderResource | BindFlag::kCopySource,
+                              device->GetFormat(), 1, uavWidth, uavHeight);
 
-    std::shared_ptr<Resource> argument_buffer = device->CreateBuffer(BindFlag::kUnorderedAccess | BindFlag::kIndirectBuffer | BindFlag::kCopyDest, sizeof(DrawIndexedIndirectCommand));
+    std::shared_ptr<Resource> argument_buffer =
+        device->CreateBuffer(BindFlag::kUnorderedAccess | BindFlag::kIndirectBuffer | BindFlag::kCopyDest,
+                             sizeof(DrawIndexedIndirectCommand));
 
     upload_command_list->Close();
     device->ExecuteCommandLists({ upload_command_list });
@@ -41,14 +45,12 @@ int main(int argc, char* argv[])
     program.cs.cbuffer.computeUniformBlock.time = GetTime();
 
     std::vector<std::shared_ptr<RenderCommandList>> command_lists;
-    for (uint32_t i = 0; i < settings.frame_count; ++i)
-    {
+    for (uint32_t i = 0; i < settings.frame_count; ++i) {
         decltype(auto) command_list = device->CreateRenderCommandList();
         command_lists.emplace_back(command_list);
     }
 
-    while (!app.PollEvents())
-    {
+    while (!app.PollEvents()) {
         program.cs.cbuffer.computeUniformBlock.time = GetTime();
 
         int32_t frameIndex = device->GetFrameIndex();
@@ -65,10 +67,12 @@ int main(int argc, char* argv[])
         {
             command_lists[frameIndex]->BeginEvent("DispatchIndirect Pass");
             command_lists[frameIndex]->UseProgram(program);
-            command_lists[frameIndex]->Attach(program.cs.cbv.computeUniformBlock, program.cs.cbuffer.computeUniformBlock);
+            command_lists[frameIndex]->Attach(program.cs.cbv.computeUniformBlock,
+                                              program.cs.cbuffer.computeUniformBlock);
             command_lists[frameIndex]->Attach(program.cs.uav.Tex0, uav);
             command_lists[frameIndex]->DispatchIndirect(argument_buffer, 0);
-            command_lists[frameIndex]->CopyTexture(uav, device->GetBackBuffer(frameIndex), { { uavWidth, uavHeight, 1 } });
+            command_lists[frameIndex]->CopyTexture(uav, device->GetBackBuffer(frameIndex),
+                                                   { { uavWidth, uavHeight, 1 } });
             command_lists[frameIndex]->EndEvent();
         }
 

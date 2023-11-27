@@ -1,4 +1,5 @@
 #include "RenderDevice/BufferLayout.h"
+
 #include <cstring>
 
 ViewProvider::ViewProvider(RenderDevice& device, const uint8_t* src_data, BufferLayout& layout)
@@ -11,17 +12,14 @@ ViewProvider::ViewProvider(RenderDevice& device, const uint8_t* src_data, Buffer
 
 std::shared_ptr<ResourceLazyViewDesc> ViewProvider::GetView(RenderCommandList& command_list)
 {
-    if (SyncData() || !m_last_view)
-    {
+    if (SyncData() || !m_last_view) {
         std::shared_ptr<Resource> resource;
-        if (!m_free_resources.empty())
-        {
+        if (!m_free_resources.empty()) {
             resource = m_free_resources.back();
             m_free_resources.pop_back();
-        }
-        else
-        {
-            resource = m_device.CreateBuffer(BindFlag::kConstantBuffer, static_cast<uint32_t>(m_layout.dst_buffer_size), MemoryType::kUpload);
+        } else {
+            resource = m_device.CreateBuffer(BindFlag::kConstantBuffer, static_cast<uint32_t>(m_layout.dst_buffer_size),
+                                             MemoryType::kUpload);
         }
         resource->UpdateUploadBuffer(0, m_dst_data.data(), m_dst_data.size());
         m_last_view = std::make_shared<ResourceLazyViewDesc>(*this, resource);
@@ -37,12 +35,10 @@ void ViewProvider::OnDestroy(ResourceLazyViewDesc& view_desc)
 bool ViewProvider::SyncData()
 {
     bool dirty = false;
-    for (size_t i = 0; i < m_layout.data_size.size(); ++i)
-    {
+    for (size_t i = 0; i < m_layout.data_size.size(); ++i) {
         const uint8_t* ptr_src = m_src_data + m_layout.src_offset[i];
         uint8_t* ptr_dst = m_dst_data.data() + m_layout.dst_offset[i];
-        if (std::memcmp(ptr_dst, ptr_src, m_layout.data_size[i]) != 0)
-        {
+        if (std::memcmp(ptr_dst, ptr_src, m_layout.data_size[i]) != 0) {
             std::memcpy(ptr_dst, ptr_src, m_layout.data_size[i]);
             dirty = true;
         }

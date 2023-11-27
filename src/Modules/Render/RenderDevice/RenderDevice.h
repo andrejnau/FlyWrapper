@@ -1,33 +1,43 @@
 #pragma once
-#include <RenderDevice/RenderTypes.h>
-#include <RenderCommandList/RenderCommandList.h>
-#include <Instance/QueryInterface.h>
-#include <RenderDevice/RenderTypes.h>
-#include <Swapchain/Swapchain.h>
-#include <CommandList/CommandList.h>
-#include <Fence/Fence.h>
-#include <RenderDevice/RenderTypes.h>
-#include <Program/Program.h>
-#include <Framebuffer/Framebuffer.h>
-#include <Pipeline/Pipeline.h>
-#include <Shader/Shader.h>
-#include <RenderPass/RenderPass.h>
-#include <CommandQueue/CommandQueue.h>
-#include <memory>
-#include <vector>
-#include <AppBox/Settings.h>
+#include "AppBox/Settings.h"
+#include "CommandList/CommandList.h"
+#include "CommandQueue/CommandQueue.h"
+#include "Fence/Fence.h"
+#include "Framebuffer/Framebuffer.h"
+#include "Instance/QueryInterface.h"
+#include "Pipeline/Pipeline.h"
+#include "Program/Program.h"
+#include "RenderCommandList/RenderCommandList.h"
+#include "RenderDevice/RenderTypes.h"
+#include "RenderPass/RenderPass.h"
+#include "Shader/Shader.h"
+#include "Swapchain/Swapchain.h"
+
 #include <gli/format.hpp>
 
-class RenderDevice : public QueryInterface
-{
+#include <memory>
+#include <vector>
+
+class RenderDevice : public QueryInterface {
 public:
     virtual ~RenderDevice() = default;
-    virtual std::shared_ptr<RenderCommandList> CreateRenderCommandList(CommandListType type = CommandListType::kGraphics) = 0;
-    virtual std::shared_ptr<Resource> CreateTexture(uint32_t bind_flag, gli::format format, uint32_t sample_count, int width, int height, int depth = 1, int mip_levels = 1) = 0;
-    virtual std::shared_ptr<Resource> CreateBuffer(uint32_t bind_flag, uint32_t buffer_size, MemoryType memory_type = MemoryType::kDefault) = 0;
+    virtual std::shared_ptr<RenderCommandList> CreateRenderCommandList(
+        CommandListType type = CommandListType::kGraphics) = 0;
+    virtual std::shared_ptr<Resource> CreateTexture(uint32_t bind_flag,
+                                                    gli::format format,
+                                                    uint32_t sample_count,
+                                                    int width,
+                                                    int height,
+                                                    int depth = 1,
+                                                    int mip_levels = 1) = 0;
+    virtual std::shared_ptr<Resource> CreateBuffer(uint32_t bind_flag,
+                                                   uint32_t buffer_size,
+                                                   MemoryType memory_type = MemoryType::kDefault) = 0;
     virtual std::shared_ptr<Resource> CreateSampler(const SamplerDesc& desc) = 0;
-    virtual std::shared_ptr<Resource> CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs, BuildAccelerationStructureFlags flags) = 0;
-    virtual std::shared_ptr<Resource> CreateTopLevelAS(uint32_t instance_count, BuildAccelerationStructureFlags flags) = 0;
+    virtual std::shared_ptr<Resource> CreateBottomLevelAS(const std::vector<RaytracingGeometryDesc>& descs,
+                                                          BuildAccelerationStructureFlags flags) = 0;
+    virtual std::shared_ptr<Resource> CreateTopLevelAS(uint32_t instance_count,
+                                                       BuildAccelerationStructureFlags flags) = 0;
     virtual std::shared_ptr<View> CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc) = 0;
     virtual std::shared_ptr<Shader> CompileShader(const ShaderDesc& desc) = 0;
     virtual std::shared_ptr<Program> CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders) = 0;
@@ -49,4 +59,7 @@ public:
     virtual void Resize(uint32_t width, uint32_t height) = 0;
 };
 
-std::shared_ptr<RenderDevice> CreateRenderDevice(const Settings& settings, WindowHandle window, uint32_t width, uint32_t height);
+std::shared_ptr<RenderDevice> CreateRenderDevice(const Settings& settings,
+                                                 WindowHandle window,
+                                                 uint32_t width,
+                                                 uint32_t height);

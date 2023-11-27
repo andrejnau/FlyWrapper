@@ -1,14 +1,14 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <Texture/TextureInfo.h>
+#include "Texture/TextureInfo.h"
+
 #include <glm/glm.hpp>
 
-struct IMesh
-{
-    struct Material
-    {
+#include <string>
+#include <vector>
+
+struct IMesh {
+    struct Material {
         std::string name;
     } material;
 

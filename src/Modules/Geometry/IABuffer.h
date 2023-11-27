@@ -1,29 +1,32 @@
 #pragma once
-#include <RenderDevice/RenderDevice.h>
-#include <Resource/Resource.h>
-#include <RenderCommandList/RenderCommandList.h>
+#include "RenderCommandList/RenderCommandList.h"
+#include "RenderDevice/RenderDevice.h"
+#include "Resource/Resource.h"
+
 #include <vector>
 
-class IAVertexBuffer
-{
+class IAVertexBuffer {
 public:
-    template<typename T>
+    template <typename T>
     IAVertexBuffer(RenderDevice& device, RenderCommandList& command_list, const std::vector<T>& v)
         : m_device(device)
         , m_size(v.size() * sizeof(v.front()))
         , m_count(v.size())
     {
-        m_buffer = m_device.CreateBuffer(BindFlag::kVertexBuffer | BindFlag::kShaderResource | BindFlag::kCopyDest, static_cast<uint32_t>(m_size));
-        if (m_buffer)
+        m_buffer = m_device.CreateBuffer(BindFlag::kVertexBuffer | BindFlag::kShaderResource | BindFlag::kCopyDest,
+                                         static_cast<uint32_t>(m_size));
+        if (m_buffer) {
             command_list.UpdateSubresource(m_buffer, 0, v.data(), 0, 0);
+        }
     }
 
     void BindToSlot(RenderCommandList& command_list, uint32_t slot)
     {
-        if (m_dynamic_buffer)
+        if (m_dynamic_buffer) {
             command_list.IASetVertexBuffer(slot, m_dynamic_buffer);
-        else if (m_buffer)
+        } else if (m_buffer) {
             command_list.IASetVertexBuffer(slot, m_buffer);
+        }
     }
 
     std::shared_ptr<Resource> GetBuffer() const
@@ -33,8 +36,10 @@ public:
 
     std::shared_ptr<Resource> GetDynamicBuffer()
     {
-        if (!m_dynamic_buffer)
-            m_dynamic_buffer = m_device.CreateBuffer(BindFlag::kVertexBuffer | BindFlag::kUnorderedAccess, static_cast<uint32_t>(m_size));
+        if (!m_dynamic_buffer) {
+            m_dynamic_buffer = m_device.CreateBuffer(BindFlag::kVertexBuffer | BindFlag::kUnorderedAccess,
+                                                     static_cast<uint32_t>(m_size));
+        }
         return m_dynamic_buffer;
     }
 
@@ -56,25 +61,27 @@ private:
     size_t m_count;
 };
 
-class IAIndexBuffer
-{
+class IAIndexBuffer {
 public:
-    template<typename T>
+    template <typename T>
     IAIndexBuffer(RenderDevice& device, RenderCommandList& command_list, const std::vector<T>& v, gli::format format)
         : m_device(device)
         , m_format(format)
         , m_count(v.size())
         , m_size(m_count * sizeof(v.front()))
     {
-        m_buffer = m_device.CreateBuffer(BindFlag::kIndexBuffer | BindFlag::kShaderResource | BindFlag::kCopyDest, static_cast<uint32_t>(m_size));
-        if (m_buffer)
+        m_buffer = m_device.CreateBuffer(BindFlag::kIndexBuffer | BindFlag::kShaderResource | BindFlag::kCopyDest,
+                                         static_cast<uint32_t>(m_size));
+        if (m_buffer) {
             command_list.UpdateSubresource(m_buffer, 0, v.data(), 0, 0);
+        }
     }
 
     void Bind(RenderCommandList& command_list)
     {
-        if (m_buffer)
+        if (m_buffer) {
             command_list.IASetIndexBuffer(m_buffer, m_format);
+        }
     }
 
     std::shared_ptr<Resource> GetBuffer() const

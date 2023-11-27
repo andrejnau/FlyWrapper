@@ -1,19 +1,23 @@
 #include "ShaderParser.h"
-#include <string>
-#include <sstream>
-#include <HLSLCompiler/Compiler.h>
-#include <ShaderReflection/ShaderReflection.h>
+
+#include "HLSLCompiler/Compiler.h"
+#include "ShaderReflection/ShaderReflection.h"
+
 #include <mustache.hpp>
+
+#include <sstream>
+#include <string>
 using namespace kainjow;
 
-class ShaderParser
-{
+class ShaderParser {
 public:
     ShaderParser(const Option& option)
         : m_option(option)
         , m_template(m_option.mustache_template)
     {
-        auto blob = Compile({ m_option.assets_path + m_option.shader_path, m_option.entrypoint, m_option.type, m_option.model }, m_option.blob_type);
+        auto blob =
+            Compile({ m_option.assets_path + m_option.shader_path, m_option.entrypoint, m_option.type, m_option.model },
+                    m_option.blob_type);
         auto reflection = CreateShaderReflection(m_option.blob_type, blob.data(), blob.size());
         ParseReflection(reflection);
     }
@@ -28,8 +32,7 @@ public:
 private:
     std::string ShaderTypeToString(ShaderType type)
     {
-        switch (type)
-        {
+        switch (type) {
         case ShaderType::kVertex:
             return "ShaderType::kVertex";
         case ShaderType::kPixel:
@@ -54,8 +57,7 @@ private:
     {
         std::string glm_prefix;
         std::string base_type;
-        switch (desc.type)
-        {
+        switch (desc.type) {
         case VariableType::kFloat:
             glm_prefix = "";
             base_type = "float";
@@ -79,25 +81,17 @@ private:
         }
 
         std::string type;
-        if (desc.rows > 1 && desc.columns > 1)
-        {
+        if (desc.rows > 1 && desc.columns > 1) {
             type = "glm::" + glm_prefix + "mat" + std::to_string(desc.columns) + "x" + std::to_string(desc.rows);
-        }
-        else if (desc.columns > 1)
-        {
+        } else if (desc.columns > 1) {
             type = "glm::" + glm_prefix + "vec" + std::to_string(desc.columns);
-        }
-        else
-        {
+        } else {
             type = base_type;
         }
 
-        if (desc.elements > 1)
-        {
+        if (desc.elements > 1) {
             return "std::array<" + type + ", " + std::to_string(desc.elements) + ">";
-        }
-        else
-        {
+        } else {
             return type;
         }
     }
@@ -106,8 +100,7 @@ private:
     {
         assert(layout.type == VariableType::kStruct);
         mustache::data variables = { mustache::data::type::list };
-        for (const auto& member : layout.members)
-        {
+        for (const auto& member : layout.members) {
             mustache::data variable = {};
             variable.set("VariableName", member.name);
             variable.set("VariableOffset", std::to_string(member.offset));
@@ -129,17 +122,14 @@ private:
 
         auto& bindings = reflection->GetBindings();
         auto& layouts = reflection->GetVariableLayouts();
-        for (size_t i = 0; i < bindings.size(); ++i)
-        {
+        for (size_t i = 0; i < bindings.size(); ++i) {
             mustache::data binding_desc = {};
             binding_desc.set("Name", bindings[i].name);
             binding_desc.set("Slot", std::to_string(bindings[i].slot));
             binding_desc.set("Space", std::to_string(bindings[i].space));
 
-            switch (bindings[i].type)
-            {
-            case ViewType::kConstantBuffer:
-            {
+            switch (bindings[i].type) {
+            case ViewType::kConstantBuffer: {
                 assert(layouts[i].offset == 0);
                 binding_desc.set("CBufferSize", std::to_string(layouts[i].size));
                 binding_desc.set("CBufferSeparator", cbuffers.is_empty_list() ? ":" : ",");
@@ -147,46 +137,38 @@ private:
                 cbuffers.push_back(binding_desc);
                 break;
             }
-            case ViewType::kSampler:
-            {
+            case ViewType::kSampler: {
                 samplers.push_back(binding_desc);
                 break;
             }
             case ViewType::kTexture:
             case ViewType::kBuffer:
             case ViewType::kStructuredBuffer:
-            case ViewType::kAccelerationStructure:
-            {
+            case ViewType::kAccelerationStructure: {
                 textures.push_back(binding_desc);
                 break;
             }
             case ViewType::kRWTexture:
             case ViewType::kRWBuffer:
-            case ViewType::kRWStructuredBuffer:
-            {
+            case ViewType::kRWStructuredBuffer: {
                 uavs.push_back(binding_desc);
                 break;
             }
             }
         }
 
-        if (m_option.type == ShaderType::kVertex)
-        {
+        if (m_option.type == ShaderType::kVertex) {
             auto& input_parameters = reflection->GetInputParameters();
-            for (size_t i = 0; i < input_parameters.size(); ++i)
-            {
+            for (size_t i = 0; i < input_parameters.size(); ++i) {
                 mustache::data input_desc = {};
                 std::string input_name = input_parameters[i].semantic_name;
                 input_desc.set("Name", input_parameters[i].semantic_name);
                 input_desc.set("Slot", std::to_string(i));
                 inputs.push_back(input_desc);
             }
-        }
-        else if (m_option.type == ShaderType::kPixel)
-        {
+        } else if (m_option.type == ShaderType::kPixel) {
             auto& output_parameters = reflection->GetOutputParameters();
-            for (size_t i = 0; i < output_parameters.size(); ++i)
-            {
+            for (size_t i = 0; i < output_parameters.size(); ++i) {
                 mustache::data output_desc = {};
                 output_desc.set("Slot", std::to_string(output_parameters[i].slot));
                 outputs.push_back(output_desc);
