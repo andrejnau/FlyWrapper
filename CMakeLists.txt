@@ -12,7 +12,7 @@ cmake_dependent_option(AGILITY_SDK_REQUIRED "Use Agility SDK" OFF "WIN32" OFF)
 cmake_dependent_option(METAL_SUPPORT "Metal support" ON "APPLE" OFF)
 option(SOFTWARE_SUPPORT "Software rendering support" OFF)
 cmake_dependent_option(BUILD_SAMPLES "Build samples" ON "NOT IOS_OR_TVOS" OFF)
-option(BUILD_TESTING "Build unit tests" OFF)
+cmake_dependent_option(BUILD_TESTING "Build unit tests" ON "NOT IOS_OR_TVOS" OFF)
 
 set(project_root "${CMAKE_CURRENT_SOURCE_DIR}")
 set(assets_path "${project_root}/assets/")
@@ -26,5 +26,9 @@ include(compiler_settings)
 add_subdirectory(3rdparty/FlyCube)
 include(3rdparty/assimp)
 include(3rdparty/mustache)
+
+if (BUILD_TESTING)
+    enable_testing()
+endif()
 
 add_subdirectory(src)
