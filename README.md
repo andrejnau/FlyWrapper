@@ -1,4 +1,4 @@
-# FlyWrapper
+# FlyWrapper [deprecated]
 FlyWrapper is a high-level graphics API is written in C++ on top of `DirectX 12`, `Vulkan` and `Metal`.
 [FlyCube](https://github.com/andrejnau/FlyCube) is used as a rendering backend.
 
