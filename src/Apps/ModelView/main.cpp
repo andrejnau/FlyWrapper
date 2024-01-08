@@ -53,6 +53,18 @@ int main(int argc, char* argv[])
     upload_command_list->Close();
     device->ExecuteCommandLists({ upload_command_list });
 
+    std::map<uint32_t, std::shared_ptr<View>> views;
+    for (auto& range : model.ia.ranges) {
+        auto& material = model.GetMaterial(range.id);
+        ViewDesc view_desc = {};
+        view_desc.bindless = true;
+        view_desc.dimension = ViewDimension::kTexture2D;
+        view_desc.view_type = ViewType::kTexture;
+        views[range.id] = device->CreateView(material.texture.albedo, view_desc);
+    }
+
+    program.ps.cbuffer.ConstantBuf.sampler_index = sampler_view->GetDescriptorId();
+
     std::vector<std::shared_ptr<RenderCommandList>> command_lists;
     for (uint32_t i = 0; i < settings.frame_count; ++i) {
         RenderPassBeginDesc render_pass_desc = {};
@@ -65,6 +77,7 @@ int main(int argc, char* argv[])
         command_list->UseProgram(program);
         command_list->SetViewport(0, 0, rect.width, rect.height);
         command_list->Attach(program.vs.cbv.ConstantBuf, program.vs.cbuffer.ConstantBuf);
+        command_list->Attach(program.ps.cbv.ConstantBuf, program.ps.cbuffer.ConstantBuf);
         model.ia.indices.Bind(*command_list);
         model.ia.positions.BindToSlot(*command_list, program.vs.ia.POSITION);
         model.ia.normals.BindToSlot(*command_list, program.vs.ia.NORMAL);
@@ -74,8 +87,7 @@ int main(int argc, char* argv[])
         command_list->BeginRenderPass(render_pass_desc);
         for (auto& range : model.ia.ranges) {
             auto& material = model.GetMaterial(range.id);
-            command_list->Attach(program.ps.srv.albedoMap, material.texture.albedo);
-            command_list->Attach(program.ps.sampler.g_sampler, sampler);
+            program.ps.cbuffer.ConstantBuf.texture_index = views[range.id]->GetDescriptorId();
             command_list->DrawIndexed(range.index_count, 1, range.start_index_location, range.base_vertex_location, 0);
         }
         command_list->EndRenderPass();
