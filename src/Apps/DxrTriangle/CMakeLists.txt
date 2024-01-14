@@ -44,7 +44,6 @@ target_link_libraries(${target}
     AppBox
     Utilities
     Texture
-    Instance
     FlyWrapperAssets
 )
 

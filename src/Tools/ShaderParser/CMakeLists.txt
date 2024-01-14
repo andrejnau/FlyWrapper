@@ -10,8 +10,7 @@ add_executable(${target}
 )
 
 target_link_libraries(${target}
-    HLSLCompiler
-    ShaderReflection
+    FlyCube
     mustache
 )
 

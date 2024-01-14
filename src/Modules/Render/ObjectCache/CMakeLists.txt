@@ -14,7 +14,7 @@ target_include_directories(ObjectCache
 )
 
 target_link_libraries(ObjectCache
-    Instance
+    FlyCube
     Utilities
 )
 

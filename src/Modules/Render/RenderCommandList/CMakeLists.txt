@@ -15,7 +15,6 @@ target_include_directories(RenderCommandList
 )
 
 target_link_libraries(RenderCommandList
-    Instance
     ObjectCache
 )
 
