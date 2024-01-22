@@ -1,4 +1,4 @@
-set(target Triangle)
+set(target Triangle2)
 
 set(include_path "${CMAKE_CURRENT_SOURCE_DIR}")
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}")

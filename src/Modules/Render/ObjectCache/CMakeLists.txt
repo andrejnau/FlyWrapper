@@ -15,7 +15,6 @@ target_include_directories(ObjectCache
 
 target_link_libraries(ObjectCache
     FlyCube
-    Utilities
 )
 
 set_target_properties(ObjectCache PROPERTIES FOLDER "Modules/Render")

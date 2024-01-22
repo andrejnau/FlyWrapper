@@ -1,5 +1,5 @@
 #include "AppBox/AppBox.h"
-#include "AppBox/ArgsParser.h"
+#include "AppSettings/ArgsParser.h"
 #include "ProgramRef/RayTracing.h"
 #include "RenderDevice/RenderDevice.h"
 
@@ -11,9 +11,9 @@ int main(int argc, char* argv[])
 {
     Settings settings = ParseArgs(argc, argv);
     AppBox app("DxrTriangle", settings);
-    AppRect rect = app.GetAppRect();
+    AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width, rect.height);
+    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
     if (!device->IsDxrSupported()) {
         throw std::runtime_error("Ray Tracing is not supported");
     }
@@ -46,19 +46,19 @@ int main(int argc, char* argv[])
     upload_command_list->BuildTopLevelAS({}, top, geometry);
     std::shared_ptr<Resource> uav =
         device->CreateTexture(BindFlag::kUnorderedAccess | BindFlag::kShaderResource | BindFlag::kCopySource,
-                              device->GetFormat(), 1, rect.width, rect.height);
+                              device->GetFormat(), 1, rect.width(), rect.height());
     upload_command_list->Close();
     device->ExecuteCommandLists({ upload_command_list });
 
     ProgramHolder<RayTracing> program(*device);
     std::vector<std::shared_ptr<RenderCommandList>> command_lists;
-    for (uint32_t i = 0; i < settings.frame_count; ++i) {
+    for (uint32_t i = 0; i < kFrameCount; ++i) {
         decltype(auto) command_list = device->CreateRenderCommandList();
         command_list->UseProgram(program);
         command_list->Attach(program.lib.srv.geometry, top);
         command_list->Attach(program.lib.uav.result, uav);
-        command_list->DispatchRays(rect.width, rect.height, 1);
-        command_list->CopyTexture(uav, device->GetBackBuffer(i), { { rect.width, rect.height, 1 } });
+        command_list->DispatchRays(rect.width(), rect.height(), 1);
+        command_list->CopyTexture(uav, device->GetBackBuffer(i), { { rect.width(), rect.height(), 1 } });
         command_list->Close();
         command_lists.emplace_back(command_list);
     }

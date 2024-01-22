@@ -48,7 +48,7 @@ ProgramHolder<PixelShader, VertexShader> program(*device);
 program.ps.cbuffer.Settings.color = glm::vec4(1, 0, 0, 1);
 
 std::vector<std::shared_ptr<RenderCommandList>> command_lists;
-for (uint32_t i = 0; i < settings.frame_count; ++i)
+for (uint32_t i = 0; i < kFrameCount; ++i)
 {
     RenderPassBeginDesc render_pass_desc = {};
     render_pass_desc.colors[program.ps.om.rtv0].texture = device->GetBackBuffer(i);

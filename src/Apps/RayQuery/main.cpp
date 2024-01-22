@@ -1,5 +1,5 @@
 #include "AppBox/AppBox.h"
-#include "AppBox/ArgsParser.h"
+#include "AppSettings/ArgsParser.h"
 #include "Camera/Camera.h"
 #include "Geometry/Geometry.h"
 #include "ProgramRef/RayQuery.h"
@@ -15,9 +15,9 @@ int main(int argc, char* argv[])
 {
     Settings settings = ParseArgs(argc, argv);
     AppBox app("RayQuery", settings);
-    AppRect rect = app.GetAppRect();
+    AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width, rect.height);
+    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
     if (!device->IsRayQuerySupported()) {
         throw std::runtime_error("Ray Query is not supported");
     }
@@ -26,8 +26,8 @@ int main(int argc, char* argv[])
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();
 
     // UAV
-    const static int uavWidth = rect.width;
-    const static int uavHeight = rect.height;
+    const static int uavWidth = rect.width();
+    const static int uavHeight = rect.height();
     std::shared_ptr<Resource> uav =
         device->CreateTexture(BindFlag::kUnorderedAccess | BindFlag::kShaderResource | BindFlag::kCopySource,
                               device->GetFormat(), 1, uavWidth, uavHeight);
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
     program.cs.cbuffer.resolution.screenHeight = uavHeight;
 
     std::vector<std::shared_ptr<RenderCommandList>> command_lists;
-    for (uint32_t i = 0; i < settings.frame_count; ++i) {
+    for (uint32_t i = 0; i < kFrameCount; ++i) {
         decltype(auto) command_list = device->CreateRenderCommandList();
         command_list->BeginEvent("RayQuery Pass");
         command_list->UseProgram(program);

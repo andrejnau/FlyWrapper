@@ -1,5 +1,5 @@
 #include "AppBox/AppBox.h"
-#include "AppBox/ArgsParser.h"
+#include "AppSettings/ArgsParser.h"
 #include "Camera/Camera.h"
 #include "Geometry/Geometry.h"
 #include "ProgramRef/Resolve.h"
@@ -14,13 +14,13 @@ int main(int argc, char* argv[])
 {
     Settings settings = ParseArgs(argc, argv);
     AppBox app("Stencil", settings);
-    AppRect rect = app.GetAppRect();
+    AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width, rect.height);
+    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
     app.SetGpuName(device->GetGpuName());
 
     auto dsv = device->CreateTexture(BindFlag::kDepthStencil | BindFlag::kShaderResource,
-                                     gli::format::FORMAT_D32_SFLOAT_S8_UINT_PACK64, 4, rect.width, rect.height, 1);
+                                     gli::format::FORMAT_D32_SFLOAT_S8_UINT_PACK64, 4, rect.width(), rect.height(), 1);
     auto sampler = device->CreateSampler({
         SamplerFilter::kAnisotropic,
         SamplerTextureAddressMode::kWrap,
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
     camera.SetCameraPos(glm::vec3(-3.0, 2.75, 0.0));
     camera.SetCameraYaw(-178.0f);
     camera.SetCameraYaw(-1.75f);
-    camera.SetViewport(rect.width, rect.height);
+    camera.SetViewport(rect.width(), rect.height());
 
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();
 
@@ -56,14 +56,14 @@ int main(int argc, char* argv[])
     device->ExecuteCommandLists({ upload_command_list });
 
     std::vector<std::shared_ptr<RenderCommandList>> command_lists;
-    for (uint32_t i = 0; i < settings.frame_count; ++i) {
+    for (uint32_t i = 0; i < kFrameCount; ++i) {
         RenderPassBeginDesc depth_render_pass_desc = {};
         depth_render_pass_desc.depth_stencil.texture = dsv;
         depth_render_pass_desc.depth_stencil.clear_depth = 1.0;
 
         decltype(auto) command_list = device->CreateRenderCommandList();
         command_list->UseProgram(program);
-        command_list->SetViewport(0, 0, rect.width, rect.height);
+        command_list->SetViewport(0, 0, rect.width(), rect.height());
         DepthStencilDesc depth_stencil_desc = {};
         depth_stencil_desc.stencil_enable = true;
         depth_stencil_desc.front_face.pass_op = StencilOp::kIncr;

@@ -1,6 +1,6 @@
 #pragma once
 #include "ApiType/ApiType.h"
-#include "AppBox/Settings.h"
+#include "AppSettings/Settings.h"
 #include "Instance/Instance.h"
 #include "ObjectCache/ObjectCache.h"
 #include "RenderCommandList/RenderCommandList.h"

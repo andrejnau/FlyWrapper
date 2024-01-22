@@ -42,7 +42,6 @@ target_link_libraries(${target}
     RenderDevice
     assimp
     AppBox
-    Utilities
     Texture
     FlyWrapperAssets
 )

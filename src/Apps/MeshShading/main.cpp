@@ -1,5 +1,5 @@
 #include "AppBox/AppBox.h"
-#include "AppBox/ArgsParser.h"
+#include "AppSettings/ArgsParser.h"
 #include "Camera/Camera.h"
 #include "Geometry/Geometry.h"
 #include "ProgramRef/MeshletMS.h"
@@ -16,16 +16,16 @@ int main(int argc, char* argv[])
 {
     Settings settings = ParseArgs(argc, argv);
     AppBox app("MeshShading", settings);
-    AppRect rect = app.GetAppRect();
+    AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width, rect.height);
+    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
     if (!device->IsMeshShadingSupported()) {
         throw std::runtime_error("Mesh Shading is not supported");
     }
     app.SetGpuName(device->GetGpuName());
 
-    auto dsv = device->CreateTexture(BindFlag::kDepthStencil, gli::format::FORMAT_D32_SFLOAT_PACK32, 1, rect.width,
-                                     rect.height, 1);
+    auto dsv = device->CreateTexture(BindFlag::kDepthStencil, gli::format::FORMAT_D32_SFLOAT_PACK32, 1, rect.width(),
+                                     rect.height(), 1);
     auto sampler = device->CreateSampler({
         SamplerFilter::kAnisotropic,
         SamplerTextureAddressMode::kWrap,
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     camera.SetCameraPos(glm::vec3(-3.0, 2.75, 0.0));
     camera.SetCameraYaw(-178.0f);
     camera.SetCameraYaw(-1.75f);
-    camera.SetViewport(rect.width, rect.height);
+    camera.SetViewport(rect.width(), rect.height());
 
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();
 
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
         program.ms.cbuffer.Constants.WorldView * glm::transpose(camera.GetProjectionMatrix());
 
     std::vector<std::shared_ptr<RenderCommandList>> command_lists;
-    for (uint32_t i = 0; i < settings.frame_count; ++i) {
+    for (uint32_t i = 0; i < kFrameCount; ++i) {
         RenderPassBeginDesc render_pass_desc = {};
         render_pass_desc.colors[0].texture = device->GetBackBuffer(i);
         render_pass_desc.colors[0].clear_color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 
         decltype(auto) command_list = device->CreateRenderCommandList();
         command_list->UseProgram(program);
-        command_list->SetViewport(0, 0, rect.width, rect.height);
+        command_list->SetViewport(0, 0, rect.width(), rect.height());
         command_list->Attach(program.ps.cbv.Constants, program.ps.cbuffer.Constants);
 
         command_list->Attach(program.ms.cbv.Constants, program.ms.cbuffer.Constants);

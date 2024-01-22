@@ -1,5 +1,5 @@
 #include "AppBox/AppBox.h"
-#include "AppBox/ArgsParser.h"
+#include "AppSettings/ArgsParser.h"
 #include "ProgramRef/Noise.h"
 #include "ProgramRef/Task.h"
 #include "RenderDevice/RenderDevice.h"
@@ -19,9 +19,10 @@ int main(int argc, char* argv[])
 {
     Settings settings = ParseArgs(argc, argv);
     AppBox app("DispatchIndirect", settings);
-    AppRect rect = app.GetAppRect();
+    AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width, rect.height);
+    std::shared_ptr<RenderDevice> device =
+        CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
     app.SetGpuName(device->GetGpuName());
 
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();
@@ -45,7 +46,7 @@ int main(int argc, char* argv[])
     program.cs.cbuffer.computeUniformBlock.time = GetTime();
 
     std::vector<std::shared_ptr<RenderCommandList>> command_lists;
-    for (uint32_t i = 0; i < settings.frame_count; ++i) {
+    for (uint32_t i = 0; i < kFrameCount; ++i) {
         decltype(auto) command_list = device->CreateRenderCommandList();
         command_lists.emplace_back(command_list);
     }

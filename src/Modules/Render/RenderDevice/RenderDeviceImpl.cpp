@@ -7,7 +7,7 @@
 RenderDeviceImpl::RenderDeviceImpl(const Settings& settings, WindowHandle window, uint32_t width, uint32_t height)
     : m_window(window)
     , m_vsync(settings.vsync)
-    , m_frame_count(settings.frame_count)
+    , m_frame_count(kFrameCount)
     , m_width(width)
     , m_height(height)
 {

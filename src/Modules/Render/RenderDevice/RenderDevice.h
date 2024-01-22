@@ -1,5 +1,5 @@
 #pragma once
-#include "AppBox/Settings.h"
+#include "AppSettings/Settings.h"
 #include "CommandList/CommandList.h"
 #include "CommandQueue/CommandQueue.h"
 #include "Fence/Fence.h"
@@ -17,6 +17,8 @@
 
 #include <memory>
 #include <vector>
+
+inline constexpr int kFrameCount = 3;
 
 class RenderDevice : public QueryInterface {
 public:

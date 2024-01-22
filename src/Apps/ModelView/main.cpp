@@ -1,5 +1,5 @@
 #include "AppBox/AppBox.h"
-#include "AppBox/ArgsParser.h"
+#include "AppSettings/ArgsParser.h"
 #include "Camera/Camera.h"
 #include "Geometry/Geometry.h"
 #include "ProgramRef/PixelShader.h"
@@ -14,13 +14,13 @@ int main(int argc, char* argv[])
 {
     Settings settings = ParseArgs(argc, argv);
     AppBox app("ModelView", settings);
-    AppRect rect = app.GetAppRect();
+    AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width, rect.height);
+    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
     app.SetGpuName(device->GetGpuName());
 
-    auto dsv = device->CreateTexture(BindFlag::kDepthStencil, gli::format::FORMAT_D32_SFLOAT_PACK32, 1, rect.width,
-                                     rect.height, 1);
+    auto dsv = device->CreateTexture(BindFlag::kDepthStencil, gli::format::FORMAT_D32_SFLOAT_PACK32, 1, rect.width(),
+                                     rect.height(), 1);
     auto sampler = device->CreateSampler({
         SamplerFilter::kAnisotropic,
         SamplerTextureAddressMode::kWrap,
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     camera.SetCameraPos(glm::vec3(-3.0, 2.75, 0.0));
     camera.SetCameraYaw(-178.0f);
     camera.SetCameraYaw(-1.75f);
-    camera.SetViewport(rect.width, rect.height);
+    camera.SetViewport(rect.width(), rect.height());
 
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();
 
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     program.ps.cbuffer.ConstantBuf.sampler_index = sampler_view->GetDescriptorId();
 
     std::vector<std::shared_ptr<RenderCommandList>> command_lists;
-    for (uint32_t i = 0; i < settings.frame_count; ++i) {
+    for (uint32_t i = 0; i < kFrameCount; ++i) {
         RenderPassBeginDesc render_pass_desc = {};
         render_pass_desc.colors[0].texture = device->GetBackBuffer(i);
         render_pass_desc.colors[0].clear_color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 
         decltype(auto) command_list = device->CreateRenderCommandList();
         command_list->UseProgram(program);
-        command_list->SetViewport(0, 0, rect.width, rect.height);
+        command_list->SetViewport(0, 0, rect.width(), rect.height());
         command_list->Attach(program.vs.cbv.ConstantBuf, program.vs.cbuffer.ConstantBuf);
         command_list->Attach(program.ps.cbv.ConstantBuf, program.ps.cbuffer.ConstantBuf);
         model.ia.indices.Bind(*command_list);
