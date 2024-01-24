@@ -13,10 +13,9 @@ set(compute_shaders
     ${shaders_path}/Task.hlsl
 )
 
-set_property(SOURCE ${compute_shaders} PROPERTY VS_SHADER_ENTRYPOINT MainCS)
-set_property(SOURCE ${compute_shaders} PROPERTY VS_SHADER_TYPE Compute)
-set_property(SOURCE ${compute_shaders} PROPERTY VS_SHADER_MODEL 6.0)
-set_property(SOURCE ${compute_shaders} PROPERTY VS_SHADER_FLAGS "/Zi /auto-binding-space 0")
+set_property(SOURCE ${compute_shaders} PROPERTY SHADER_ENTRYPOINT MainCS)
+set_property(SOURCE ${compute_shaders} PROPERTY SHADER_TYPE Compute)
+set_property(SOURCE ${compute_shaders} PROPERTY SHADER_MODEL 6.0)
 
 set(shaders_files ${compute_shaders})
 

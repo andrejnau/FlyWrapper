@@ -12,10 +12,9 @@ set(lib_shaders
     ${shaders_path}/RayTracing.hlsl
 )
 
-set_property(SOURCE ${lib_shaders} PROPERTY VS_SHADER_ENTRYPOINT " ")
-set_property(SOURCE ${lib_shaders} PROPERTY VS_SHADER_TYPE Library)
-set_property(SOURCE ${lib_shaders} PROPERTY VS_SHADER_MODEL 6.3)
-set_property(SOURCE ${lib_shaders} PROPERTY VS_SHADER_FLAGS "/Zi /auto-binding-space 0")
+set_property(SOURCE ${lib_shaders} PROPERTY SHADER_ENTRYPOINT " ")
+set_property(SOURCE ${lib_shaders} PROPERTY SHADER_TYPE Library)
+set_property(SOURCE ${lib_shaders} PROPERTY SHADER_MODEL 6.3)
 
 set(shaders_files ${lib_shaders})
 

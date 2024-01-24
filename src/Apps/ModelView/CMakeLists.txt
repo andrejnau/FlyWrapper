@@ -16,15 +16,13 @@ set(vertex_shaders
     ${shaders_path}/VertexShader.hlsl
 )
 
-set_property(SOURCE ${pixel_shaders} PROPERTY VS_SHADER_ENTRYPOINT main)
-set_property(SOURCE ${pixel_shaders} PROPERTY VS_SHADER_TYPE Pixel)
-set_property(SOURCE ${pixel_shaders} PROPERTY VS_SHADER_MODEL 6.0)
-set_property(SOURCE ${pixel_shaders} PROPERTY VS_SHADER_FLAGS "/Zi /auto-binding-space 0")
+set_property(SOURCE ${pixel_shaders} PROPERTY SHADER_ENTRYPOINT main)
+set_property(SOURCE ${pixel_shaders} PROPERTY SHADER_TYPE Pixel)
+set_property(SOURCE ${pixel_shaders} PROPERTY SHADER_MODEL 6.0)
 
-set_property(SOURCE ${vertex_shaders} PROPERTY VS_SHADER_ENTRYPOINT main)
-set_property(SOURCE ${vertex_shaders} PROPERTY VS_SHADER_TYPE Vertex)
-set_property(SOURCE ${vertex_shaders} PROPERTY VS_SHADER_MODEL 6.0)
-set_property(SOURCE ${vertex_shaders} PROPERTY VS_SHADER_FLAGS "/Zi /auto-binding-space 0")
+set_property(SOURCE ${vertex_shaders} PROPERTY SHADER_ENTRYPOINT main)
+set_property(SOURCE ${vertex_shaders} PROPERTY SHADER_TYPE Vertex)
+set_property(SOURCE ${vertex_shaders} PROPERTY SHADER_MODEL 6.0)
 
 set(shaders_files ${pixel_shaders} ${vertex_shaders})
 
