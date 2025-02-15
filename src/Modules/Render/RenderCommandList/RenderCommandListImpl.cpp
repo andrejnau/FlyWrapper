@@ -261,10 +261,12 @@ void RenderCommandListImpl::DispatchIndirect(const std::shared_ptr<Resource>& ar
     m_command_list->DispatchIndirect(argument_buffer, argument_buffer_offset);
 }
 
-void RenderCommandListImpl::DispatchMesh(uint32_t thread_group_count_x)
+void RenderCommandListImpl::DispatchMesh(uint32_t thread_group_count_x,
+                                         uint32_t thread_group_count_y,
+                                         uint32_t thread_group_count_z)
 {
     Apply();
-    m_command_list->DispatchMesh(thread_group_count_x);
+    m_command_list->DispatchMesh(thread_group_count_x, thread_group_count_y, thread_group_count_z);
 }
 
 void RenderCommandListImpl::DispatchRays(uint32_t width, uint32_t height, uint32_t depth)

@@ -60,7 +60,9 @@ public:
                                   uint32_t stride) override;
     void Dispatch(uint32_t thread_group_count_x, uint32_t thread_group_count_y, uint32_t thread_group_count_z) override;
     void DispatchIndirect(const std::shared_ptr<Resource>& argument_buffer, uint64_t argument_buffer_offset) override;
-    void DispatchMesh(uint32_t thread_group_count_x) override;
+    void DispatchMesh(uint32_t thread_group_count_x,
+                      uint32_t thread_group_count_y,
+                      uint32_t thread_group_count_z) override;
     void DispatchRays(uint32_t width, uint32_t height, uint32_t depth) override;
     void SetViewport(float x, float y, float width, float height) override;
     void SetScissorRect(int32_t left, int32_t top, uint32_t right, uint32_t bottom) override;
