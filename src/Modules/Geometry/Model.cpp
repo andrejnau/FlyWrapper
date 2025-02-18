@@ -1,13 +1,19 @@
 #include "Geometry/Model.h"
 
-Model::Model(RenderDevice& device, RenderCommandList& command_list, const std::string& file, uint32_t flags)
+Model::Model(RenderDevice& device,
+             RenderCommandList& command_list,
+             const std::string& file,
+             bool ignore_materials,
+             uint32_t flags)
     : m_device(device)
     , m_model_loader(std::make_unique<ModelLoader>(file, static_cast<aiPostProcessSteps>(flags), *this))
     , ia(device, command_list, meshes)
     , m_cache(device, command_list)
 {
     for (auto& mesh : meshes) {
-        materials.emplace_back(m_cache, mesh.material, mesh.textures);
+        if (!ignore_materials) {
+            materials.emplace_back(m_cache, mesh.material, mesh.textures);
+        }
 
         for (const auto& pos : mesh.positions) {
             bound_box.x_min = std::min(bound_box.x_min, pos.x);

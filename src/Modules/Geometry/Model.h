@@ -18,7 +18,11 @@ struct BoundBox {
 
 class Model : public IModel {
 public:
-    Model(RenderDevice& device, RenderCommandList& command_list, const std::string& file, uint32_t flags = ~0);
+    Model(RenderDevice& device,
+          RenderCommandList& command_list,
+          const std::string& file,
+          bool ignore_materials = false,
+          uint32_t flags = ~0);
     virtual void AddMesh(const IMesh& mesh) override;
     virtual Bones& GetBones() override;
 

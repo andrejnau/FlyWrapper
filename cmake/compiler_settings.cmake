@@ -4,9 +4,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (MSVC)
     add_compile_options("/MP")
-    add_definitions(-DUNICODE -D_UNICODE)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    add_definitions(-DNOMINMAX)
+    add_compile_definitions(UNICODE _UNICODE)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    add_compile_definitions(NOMINMAX)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-array-bounds>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-stringop-overflow>
+    )
 endif()
 
 if (APPLE)
