@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
     AppSize rect = app.GetAppSize();
 
     std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
-    if (!device->IsVariableRateShadingSupported()) {
+    if (!device->IsVariableRateShadingSupported() || device->GetShadingRateImageTileSize() == 0) {
         throw std::runtime_error("Variable rate shading is not supported");
     }
     app.SetGpuName(device->GetGpuName());
