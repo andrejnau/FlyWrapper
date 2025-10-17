@@ -15,7 +15,7 @@ struct VS_OUTPUT
     float2 texCoord  : TEXCOORD;
 };
 
-cbuffer ConstantBuf
+cbuffer ConstantBuf : register(b0, space0)
 {
     float4x4 model;
     float4x4 view;

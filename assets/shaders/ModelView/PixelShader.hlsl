@@ -7,14 +7,14 @@ struct VS_OUTPUT
     float2 texCoord  : TEXCOORD;
 };
 
-cbuffer ConstantBuf
+cbuffer ConstantBuf : register(b1, space0)
 {
     uint32_t texture_index;
     uint32_t sampler_index;
 };
 
-Texture2D albedoMap[] : register(t, space8);
-SamplerState g_sampler[] : register(s, space9);
+SamplerState g_sampler[] : register(s0, space4);
+Texture2D albedoMap[] : register(t0, space5);
 
 float4 getTexture(Texture2D _texture, SamplerState _sample, float2 _tex_coord, bool _need_gamma = false)
 {
