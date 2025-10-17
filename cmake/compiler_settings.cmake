@@ -15,6 +15,9 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 if (APPLE)
+    add_compile_options(
+        -Wno-missing-template-arg-list-after-template-kw
+    )
     set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
     set(CMAKE_INSTALL_RPATH "/usr/local/lib")
 endif()
