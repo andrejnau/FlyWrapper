@@ -22,7 +22,6 @@ include(cmake_settings)
 include(compiler_settings)
 
 add_subdirectory(3rdparty/FlyCube)
-include(3rdparty/assimp)
 include(3rdparty/mustache)
 
 if (BUILD_TESTING)

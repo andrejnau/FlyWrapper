@@ -1,6 +1,3 @@
-[submodule "3rdparty/assimp"]
-	path = 3rdparty/assimp
-	url = https://github.com/assimp/assimp.git
 [submodule "3rdparty/Mustache"]
 	path = 3rdparty/Mustache
 	url = https://github.com/kainjow/Mustache.git

@@ -159,13 +159,13 @@ void RenderCommandListImpl::SetScissorRect(int32_t left, int32_t top, uint32_t r
 void RenderCommandListImpl::IASetIndexBuffer(const std::shared_ptr<Resource>& resource, gli::format format)
 {
     BufferBarrier(resource, ResourceState::kIndexBuffer);
-    m_command_list->IASetIndexBuffer(resource, format);
+    m_command_list->IASetIndexBuffer(resource, 0, format);
 }
 
 void RenderCommandListImpl::IASetVertexBuffer(uint32_t slot, const std::shared_ptr<Resource>& resource)
 {
     BufferBarrier(resource, ResourceState::kVertexAndConstantBuffer);
-    m_command_list->IASetVertexBuffer(slot, resource);
+    m_command_list->IASetVertexBuffer(slot, resource, 0);
 }
 
 void RenderCommandListImpl::RSSetShadingRateImage(const std::shared_ptr<View>& view)
