@@ -6,6 +6,7 @@
 #include "RenderCommandList/RenderCommandList.h"
 #include "RenderDevice/RenderDevice.h"
 #include "RenderDevice/RenderTypes.h"
+#include "RenderDevice/ResourceStateTracker.h"
 #include "Resource/Resource.h"
 
 #include <gli/gli.hpp>
@@ -57,6 +58,7 @@ public:
 
 private:
     void InsertPresentBarrier();
+    ResourceStateTracker& GetGlobalResourceStateTracker(Resource* resource);
 
     WindowHandle m_window;
     bool m_vsync;
@@ -76,4 +78,5 @@ private:
     std::vector<std::shared_ptr<CommandList>> m_command_list_pool;
     std::deque<std::pair<uint64_t /*fence_value*/, size_t /*offset*/>> m_fence_value_by_cmd;
     std::unique_ptr<ObjectCache> m_object_cache;
+    std::map<Resource*, ResourceStateTracker> m_resource_state_trackers;
 };

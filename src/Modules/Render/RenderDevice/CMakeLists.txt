@@ -3,11 +3,13 @@ list(APPEND headers
     RenderDeviceImpl.h
     BufferLayout.h
     ProgramHolder.h
+    ResourceStateTracker.h
 )
 
 list(APPEND sources
     RenderDeviceImpl.cpp
     BufferLayout.cpp
+    ResourceStateTracker.cpp
 )
 
 add_library(RenderDevice ${headers} ${sources})

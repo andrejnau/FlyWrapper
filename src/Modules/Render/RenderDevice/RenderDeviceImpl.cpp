@@ -173,7 +173,7 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
                 continue;
             }
             decltype(auto) resource_base = barrier.resource->As<ResourceBase>();
-            auto& global_state_tracker = resource_base.GetGlobalResourceStateTracker();
+            auto& global_state_tracker = GetGlobalResourceStateTracker(&resource_base);
             if (global_state_tracker.HasResourceState() && barrier.base_mip_level == 0 &&
                 barrier.level_count == barrier.resource->GetLevelCount() && barrier.base_array_layer == 0 &&
                 barrier.layer_count == barrier.resource->GetLayerCount()) {
@@ -228,11 +228,8 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
         }
 
         auto& state_trackers = command_list_impl.GetResourceStateTrackers();
-        for (const auto& state_tracker_pair : state_trackers) {
-            auto& resource = state_tracker_pair.first;
-            auto& state_tracker = state_tracker_pair.second;
-            decltype(auto) resource_base = resource->As<ResourceBase>();
-            auto& global_state_tracker = resource_base.GetGlobalResourceStateTracker();
+        for (const auto& [resource, state_tracker] : state_trackers) {
+            auto& global_state_tracker = GetGlobalResourceStateTracker(resource.get());
             global_state_tracker.Merge(state_tracker);
         }
 
@@ -268,7 +265,7 @@ void RenderDeviceImpl::InsertPresentBarrier()
 {
     auto back_buffer = GetBackBuffer(GetFrameIndex());
     decltype(auto) resource_base = back_buffer->As<ResourceBase>();
-    decltype(auto) global_state_tracker = resource_base.GetGlobalResourceStateTracker();
+    decltype(auto) global_state_tracker = GetGlobalResourceStateTracker(&resource_base);
 
     ResourceBarrierDesc barrier = {};
     barrier.resource = back_buffer;
@@ -302,6 +299,15 @@ void RenderDeviceImpl::Wait(uint64_t fence_value)
 uint32_t RenderDeviceImpl::GetFrameIndex() const
 {
     return m_frame_index;
+}
+
+ResourceStateTracker& RenderDeviceImpl::GetGlobalResourceStateTracker(Resource* resource)
+{
+    auto it = m_resource_state_trackers.find(resource);
+    if (it == m_resource_state_trackers.end()) {
+        it = m_resource_state_trackers.emplace(resource, resource).first;
+    }
+    return it->second;
 }
 
 std::shared_ptr<RenderDevice> CreateRenderDevice(const Settings& settings,

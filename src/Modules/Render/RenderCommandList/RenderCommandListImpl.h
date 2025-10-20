@@ -2,6 +2,7 @@
 #include "Device/Device.h"
 #include "ObjectCache/ObjectCache.h"
 #include "RenderCommandList/RenderCommandList.h"
+#include "RenderDevice/ResourceStateTracker.h"
 
 struct LazyResourceBarrierDesc {
     std::shared_ptr<Resource> resource;

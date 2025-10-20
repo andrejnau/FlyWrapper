@@ -719,7 +719,7 @@ ResourceStateTracker& RenderCommandListImpl::GetResourceStateTracker(const std::
 {
     auto it = m_resource_state_tracker.find(resource);
     if (it == m_resource_state_tracker.end()) {
-        it = m_resource_state_tracker.emplace(resource, *resource).first;
+        it = m_resource_state_tracker.emplace(resource, resource.get()).first;
     }
     return it->second;
 }
