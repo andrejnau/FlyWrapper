@@ -169,9 +169,6 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
         decltype(auto) command_list_impl = command_lists[c]->As<RenderCommandListImpl>();
         auto barriers = command_list_impl.GetLazyBarriers();
         for (auto& barrier : barriers) {
-            if (c == 0 && barrier.resource->AllowCommonStatePromotion(barrier.state_after)) {
-                continue;
-            }
             decltype(auto) resource_base = barrier.resource->As<ResourceBase>();
             auto& global_state_tracker = GetGlobalResourceStateTracker(&resource_base);
             if (global_state_tracker.HasResourceState() && barrier.base_mip_level == 0 &&
