@@ -54,9 +54,16 @@ std::shared_ptr<Resource> RenderDeviceImpl::CreateTexture(uint32_t bind_flag,
                                                           int depth,
                                                           int mip_levels)
 {
-    auto res =
-        m_device->CreateTexture(TextureType::k2D, bind_flag, format, sample_count, width, height, depth, mip_levels);
-    res->CommitMemory(MemoryType::kDefault);
+    auto res = m_device->CreateTexture(MemoryType::kDefault, {
+                                                                 .type = TextureType::k2D,
+                                                                 .format = format,
+                                                                 .width = static_cast<uint32_t>(width),
+                                                                 .height = static_cast<uint32_t>(height),
+                                                                 .depth_or_array_layers = static_cast<uint32_t>(depth),
+                                                                 .mip_levels = static_cast<uint32_t>(mip_levels),
+                                                                 .sample_count = sample_count,
+                                                                 .usage = bind_flag,
+                                                             });
     return res;
 }
 
@@ -64,10 +71,10 @@ std::shared_ptr<Resource> RenderDeviceImpl::CreateBuffer(uint32_t bind_flag,
                                                          uint32_t buffer_size,
                                                          MemoryType memory_type)
 {
-    auto res = m_device->CreateBuffer(bind_flag, buffer_size);
-    if (res) {
-        res->CommitMemory(memory_type);
-    }
+    auto res = m_device->CreateBuffer(memory_type, {
+                                                       .size = buffer_size,
+                                                       .usage = bind_flag,
+                                                   });
     return res;
 }
 
@@ -81,9 +88,16 @@ std::shared_ptr<Resource> RenderDeviceImpl::CreateBottomLevelAS(const std::vecto
 {
     auto prebuild_info = m_device->GetBLASPrebuildInfo(descs, flags);
     std::shared_ptr<Resource> memory =
-        m_device->CreateBuffer(BindFlag::kAccelerationStructure, prebuild_info.acceleration_structure_size);
-    memory->CommitMemory(MemoryType::kDefault);
-    return m_device->CreateAccelerationStructure(AccelerationStructureType::kBottomLevel, memory, 0);
+        m_device->CreateBuffer(MemoryType::kDefault, {
+                                                         .size = prebuild_info.acceleration_structure_size,
+                                                         .usage = BindFlag::kAccelerationStructure,
+                                                     });
+    return m_device->CreateAccelerationStructure({
+        .type = AccelerationStructureType::kBottomLevel,
+        .buffer = memory,
+        .buffer_offset = 0,
+        .size = prebuild_info.acceleration_structure_size,
+    });
 }
 
 std::shared_ptr<Resource> RenderDeviceImpl::CreateTopLevelAS(uint32_t instance_count,
@@ -91,9 +105,16 @@ std::shared_ptr<Resource> RenderDeviceImpl::CreateTopLevelAS(uint32_t instance_c
 {
     auto prebuild_info = m_device->GetTLASPrebuildInfo(instance_count, flags);
     std::shared_ptr<Resource> memory =
-        m_device->CreateBuffer(BindFlag::kAccelerationStructure, prebuild_info.acceleration_structure_size);
-    memory->CommitMemory(MemoryType::kDefault);
-    return m_device->CreateAccelerationStructure(AccelerationStructureType::kTopLevel, memory, 0);
+        m_device->CreateBuffer(MemoryType::kDefault, {
+                                                         .size = prebuild_info.acceleration_structure_size,
+                                                         .usage = BindFlag::kAccelerationStructure,
+                                                     });
+    return m_device->CreateAccelerationStructure({
+        .type = AccelerationStructureType::kTopLevel,
+        .buffer = memory,
+        .buffer_offset = 0,
+        .size = prebuild_info.acceleration_structure_size,
+    });
 }
 
 std::shared_ptr<View> RenderDeviceImpl::CreateView(const std::shared_ptr<Resource>& resource, const ViewDesc& view_desc)
