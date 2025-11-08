@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
         for (auto& range : model.ia.ranges) {
             program.ms.cbuffer.MeshInfo.IndexCount = range.index_count;
             program.ms.cbuffer.MeshInfo.IndexOffset = 0;
-            command_list->DispatchMesh((range.index_count + kMaxOutputPrimitives - 1) / kMaxOutputPrimitives, 1, 1);
+            command_list->DispatchMesh((range.index_count / 3 + kMaxOutputPrimitives - 1) / kMaxOutputPrimitives, 1, 1);
         }
         command_list->EndRenderPass();
 
