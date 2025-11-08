@@ -1,4 +1,4 @@
-set(target RayQuery)
+set(target RayQuery2)
 
 set(include_path "${CMAKE_CURRENT_SOURCE_DIR}")
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}")
