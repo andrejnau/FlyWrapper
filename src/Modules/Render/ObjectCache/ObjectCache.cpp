@@ -41,18 +41,6 @@ std::shared_ptr<Pipeline> ObjectCache::GetPipeline(const RayTracingPipelineDesc&
     return it->second;
 }
 
-std::shared_ptr<RenderPass> ObjectCache::GetRenderPass(const RenderPassDesc& desc)
-{
-    auto it = m_render_pass_cache.find(desc);
-    if (it == m_render_pass_cache.end()) {
-        auto render_pass = m_device.CreateRenderPass(desc);
-        it = m_render_pass_cache
-                 .emplace(std::piecewise_construct, std::forward_as_tuple(desc), std::forward_as_tuple(render_pass))
-                 .first;
-    }
-    return it->second;
-}
-
 std::shared_ptr<BindingSetLayout> ObjectCache::GetBindingSetLayout(const std::vector<BindKey>& keys)
 {
     auto it = m_layout_cache.find(keys);
@@ -75,29 +63,6 @@ std::shared_ptr<BindingSet> ObjectCache::GetBindingSet(const std::shared_ptr<Bin
         it = m_binding_set_cache
                  .emplace(std::piecewise_construct, std::forward_as_tuple(layout, bindings),
                           std::forward_as_tuple(binding_set))
-                 .first;
-    }
-    return it->second;
-}
-
-std::shared_ptr<Framebuffer> ObjectCache::GetFramebuffer(const FramebufferDesc& desc)
-{
-    for (const auto& view : desc.colors) {
-        if (!view) {
-            continue;
-        }
-
-        decltype(auto) res = view->GetResource();
-        if (res->IsBackBuffer()) {
-            return m_device.CreateFramebuffer(desc);
-        }
-    }
-
-    auto it = m_framebuffers.find(desc);
-    if (it == m_framebuffers.end()) {
-        auto framebuffer = m_device.CreateFramebuffer(desc);
-        it = m_framebuffers
-                 .emplace(std::piecewise_construct, std::forward_as_tuple(desc), std::forward_as_tuple(framebuffer))
                  .first;
     }
     return it->second;

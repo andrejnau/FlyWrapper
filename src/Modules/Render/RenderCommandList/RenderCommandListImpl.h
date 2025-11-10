@@ -123,7 +123,7 @@ private:
     Device& m_device;
     ObjectCache& m_object_cache;
     std::shared_ptr<CommandList> m_command_list;
-    std::vector<std::shared_ptr<Framebuffer>> m_framebuffers;
+    std::vector<std::shared_ptr<View>> m_attachments;
     uint32_t m_viewport_width = 0;
     uint32_t m_viewport_height = 0;
 

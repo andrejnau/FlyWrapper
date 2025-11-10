@@ -17,7 +17,7 @@ const std::shared_ptr<CommandList>& RenderCommandListImpl::GetCommandList()
 void RenderCommandListImpl::Reset()
 {
     m_command_list->Reset();
-    m_framebuffers.clear();
+    m_attachments.clear();
     m_viewport_width = 0;
     m_viewport_height = 0;
     m_bound_resources.clear();
@@ -585,37 +585,37 @@ void RenderCommandListImpl::SetBinding(const BindKey& bind_key, const std::share
 void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
 {
     RenderPassDesc render_pass_desc = {};
+    render_pass_desc.colors.resize(desc.colors.size());
     ClearDesc clear_desc = {};
-    render_pass_desc.colors.reserve(desc.colors.size());
-    for (const auto& color_desc : desc.colors) {
-        auto& color = render_pass_desc.colors.emplace_back();
-        clear_desc.colors.emplace_back() = color_desc.clear_color;
+    clear_desc.colors.resize(desc.colors.size());
+    m_graphic_pipeline_desc.color_formats.resize(desc.colors.size());
+    for (size_t i = 0; i < desc.colors.size(); ++i) {
+        const auto& color_desc = desc.colors[i];
         if (!color_desc.texture) {
             continue;
         }
-        color.format = color_desc.texture->GetFormat();
-        color.load_op = color_desc.load_op;
-        color.store_op = color_desc.store_op;
+
+        clear_desc.colors[i] = color_desc.clear_color;
+        m_graphic_pipeline_desc.color_formats[i] = color_desc.texture->GetFormat();
+        render_pass_desc.colors[i].load_op = color_desc.load_op;
+        render_pass_desc.colors[i].store_op = color_desc.store_op;
         render_pass_desc.sample_count = color_desc.texture->GetSampleCount();
+        m_graphic_pipeline_desc.sample_count = color_desc.texture->GetSampleCount();
     }
 
     if (desc.depth_stencil.texture) {
-        render_pass_desc.depth_stencil.format = desc.depth_stencil.texture->GetFormat();
+        m_graphic_pipeline_desc.depth_stencil_format = desc.depth_stencil.texture->GetFormat();
         render_pass_desc.depth_stencil.depth_load_op = desc.depth_stencil.depth_load_op;
         render_pass_desc.depth_stencil.depth_store_op = desc.depth_stencil.depth_store_op;
         render_pass_desc.depth_stencil.stencil_load_op = desc.depth_stencil.stencil_load_op;
         render_pass_desc.depth_stencil.stencil_store_op = desc.depth_stencil.stencil_store_op;
         render_pass_desc.sample_count = desc.depth_stencil.texture->GetSampleCount();
+        m_graphic_pipeline_desc.sample_count = desc.depth_stencil.texture->GetSampleCount();
         clear_desc.depth = desc.depth_stencil.clear_depth;
         clear_desc.stencil = desc.depth_stencil.clear_stencil;
     }
 
-    if (m_shading_rate_image) {
-        render_pass_desc.shading_rate_format = m_shading_rate_image->GetResource()->GetFormat();
-    } else {
-        render_pass_desc.shading_rate_format = gli::format::FORMAT_UNDEFINED;
-    }
-
+    uint32_t layers = 1;
     std::vector<std::shared_ptr<View>> rtvs;
     for (size_t i = 0; i < desc.colors.size(); ++i) {
         auto& view = rtvs.emplace_back();
@@ -625,28 +625,31 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
 
         BindKey bind_key = { ShaderType::kPixel, ViewType::kRenderTarget, (uint32_t)i, 0 };
         view = m_object_cache.GetView(m_program, bind_key, desc.colors[i].texture, desc.colors[i].view_desc);
+        layers = std::max(layers, view->GetLayerCount());
         ViewBarrier(view, ResourceState::kRenderTarget);
+        m_attachments.push_back(view);
     }
 
     std::shared_ptr<View> dsv;
     if (desc.depth_stencil.texture) {
         BindKey bind_key = { ShaderType::kPixel, ViewType::kDepthStencil, 0, 0 };
         dsv = m_object_cache.GetView(m_program, bind_key, desc.depth_stencil.texture, desc.depth_stencil.view_desc);
+        layers = std::max(layers, dsv->GetLayerCount());
         ViewBarrier(dsv, ResourceState::kDepthStencilWrite);
+        m_attachments.push_back(dsv);
     }
 
-    std::shared_ptr<RenderPass> render_pass = m_object_cache.GetRenderPass(render_pass_desc);
-    m_graphic_pipeline_desc.render_pass = render_pass;
+    if (m_shading_rate_image) {
+        m_attachments.push_back(m_shading_rate_image);
+    }
 
     FramebufferDesc framebuffer_desc = {};
-    framebuffer_desc.render_pass = render_pass;
     framebuffer_desc.width = m_viewport_width;
     framebuffer_desc.height = m_viewport_height;
+    framebuffer_desc.layers = layers;
     framebuffer_desc.colors = rtvs;
     framebuffer_desc.depth_stencil = dsv;
     framebuffer_desc.shading_rate_image = m_shading_rate_image;
-    std::shared_ptr<Framebuffer> framebuffer = m_object_cache.GetFramebuffer(framebuffer_desc);
-    m_framebuffers.emplace_back(framebuffer);
 
     std::array<ShadingRateCombiner, 2> combiners = { ShadingRateCombiner::kPassthrough,
                                                      ShadingRateCombiner::kPassthrough };
@@ -658,7 +661,7 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
         m_shading_rate_combiner = combiners[1];
     }
 
-    m_command_list->BeginRenderPass(render_pass, framebuffer, clear_desc);
+    m_command_list->BeginRenderPass(render_pass_desc, framebuffer_desc, clear_desc);
 }
 
 void RenderCommandListImpl::EndRenderPass()
