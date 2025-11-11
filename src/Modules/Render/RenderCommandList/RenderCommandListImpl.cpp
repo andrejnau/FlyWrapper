@@ -586,8 +586,6 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
 {
     RenderPassDesc render_pass_desc = {};
     render_pass_desc.colors.resize(desc.colors.size());
-    ClearDesc clear_desc = {};
-    clear_desc.colors.resize(desc.colors.size());
     m_graphic_pipeline_desc.color_formats.resize(desc.colors.size());
     for (size_t i = 0; i < desc.colors.size(); ++i) {
         const auto& color_desc = desc.colors[i];
@@ -595,39 +593,38 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
             continue;
         }
 
-        clear_desc.colors[i] = color_desc.clear_color;
         m_graphic_pipeline_desc.color_formats[i] = color_desc.texture->GetFormat();
         render_pass_desc.colors[i].load_op = color_desc.load_op;
         render_pass_desc.colors[i].store_op = color_desc.store_op;
+        render_pass_desc.colors[i].clear_value = color_desc.clear_color;
         render_pass_desc.sample_count = color_desc.texture->GetSampleCount();
         m_graphic_pipeline_desc.sample_count = color_desc.texture->GetSampleCount();
     }
 
     if (desc.depth_stencil.texture) {
         m_graphic_pipeline_desc.depth_stencil_format = desc.depth_stencil.texture->GetFormat();
-        render_pass_desc.depth_stencil.depth_load_op = desc.depth_stencil.depth_load_op;
-        render_pass_desc.depth_stencil.depth_store_op = desc.depth_stencil.depth_store_op;
-        render_pass_desc.depth_stencil.stencil_load_op = desc.depth_stencil.stencil_load_op;
-        render_pass_desc.depth_stencil.stencil_store_op = desc.depth_stencil.stencil_store_op;
+        render_pass_desc.depth.load_op = desc.depth_stencil.depth_load_op;
+        render_pass_desc.depth.store_op = desc.depth_stencil.depth_store_op;
+        render_pass_desc.stencil.load_op = desc.depth_stencil.stencil_load_op;
+        render_pass_desc.stencil.store_op = desc.depth_stencil.stencil_store_op;
         render_pass_desc.sample_count = desc.depth_stencil.texture->GetSampleCount();
         m_graphic_pipeline_desc.sample_count = desc.depth_stencil.texture->GetSampleCount();
-        clear_desc.depth = desc.depth_stencil.clear_depth;
-        clear_desc.stencil = desc.depth_stencil.clear_stencil;
+        render_pass_desc.depth.clear_value = desc.depth_stencil.clear_depth;
+        render_pass_desc.stencil.clear_value = desc.depth_stencil.clear_stencil;
     }
 
     uint32_t layers = 1;
-    std::vector<std::shared_ptr<View>> rtvs;
     for (size_t i = 0; i < desc.colors.size(); ++i) {
-        auto& view = rtvs.emplace_back();
         if (!desc.colors[i].texture) {
             continue;
         }
 
         BindKey bind_key = { ShaderType::kPixel, ViewType::kRenderTarget, (uint32_t)i, 0 };
-        view = m_object_cache.GetView(m_program, bind_key, desc.colors[i].texture, desc.colors[i].view_desc);
+        auto view = m_object_cache.GetView(m_program, bind_key, desc.colors[i].texture, desc.colors[i].view_desc);
         layers = std::max(layers, view->GetLayerCount());
         ViewBarrier(view, ResourceState::kRenderTarget);
         m_attachments.push_back(view);
+        render_pass_desc.colors[i].view = view;
     }
 
     std::shared_ptr<View> dsv;
@@ -643,13 +640,10 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
         m_attachments.push_back(m_shading_rate_image);
     }
 
-    FramebufferDesc framebuffer_desc = {};
-    framebuffer_desc.width = m_viewport_width;
-    framebuffer_desc.height = m_viewport_height;
-    framebuffer_desc.layers = layers;
-    framebuffer_desc.colors = rtvs;
-    framebuffer_desc.depth_stencil = dsv;
-    framebuffer_desc.shading_rate_image = m_shading_rate_image;
+    render_pass_desc.render_area = { 0, 0, m_viewport_width, m_viewport_height };
+    render_pass_desc.layers = layers;
+    render_pass_desc.depth_stencil_view = dsv;
+    render_pass_desc.shading_rate_image_view = m_shading_rate_image;
 
     std::array<ShadingRateCombiner, 2> combiners = { ShadingRateCombiner::kPassthrough,
                                                      ShadingRateCombiner::kPassthrough };
@@ -661,7 +655,7 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
         m_shading_rate_combiner = combiners[1];
     }
 
-    m_command_list->BeginRenderPass(render_pass_desc, framebuffer_desc, clear_desc);
+    m_command_list->BeginRenderPass(render_pass_desc);
 }
 
 void RenderCommandListImpl::EndRenderPass()
