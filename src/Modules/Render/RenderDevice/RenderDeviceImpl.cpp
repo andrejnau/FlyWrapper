@@ -129,7 +129,7 @@ std::shared_ptr<Shader> RenderDeviceImpl::CompileShader(const ShaderDesc& desc)
 
 std::shared_ptr<Program> RenderDeviceImpl::CreateProgram(const std::vector<std::shared_ptr<Shader>>& shaders)
 {
-    return m_device->CreateProgram(shaders);
+    return std::make_shared<Program>(shaders);
 }
 
 bool RenderDeviceImpl::IsDxrSupported() const

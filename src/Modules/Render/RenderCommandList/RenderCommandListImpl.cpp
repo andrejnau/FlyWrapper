@@ -394,11 +394,11 @@ void RenderCommandListImpl::UseProgram(const std::shared_ptr<Program>& program)
 
     if (m_program->HasShader(ShaderType::kCompute)) {
         m_pipeline_type = PipelineType::kCompute;
-        m_compute_pipeline_desc.program = m_program;
+        m_compute_pipeline_desc.shader = m_program->GetShader(ShaderType::kCompute);
         m_compute_pipeline_desc.layout = m_layout;
     } else if (m_program->HasShader(ShaderType::kLibrary)) {
         m_pipeline_type = PipelineType::kRayTracing;
-        m_ray_tracing_pipeline_desc.program = m_program;
+        m_ray_tracing_pipeline_desc.shaders = m_program->GetShaders();
         m_ray_tracing_pipeline_desc.layout = m_layout;
 
         std::vector<RayTracingShaderGroup>& groups = m_ray_tracing_pipeline_desc.groups;
@@ -449,7 +449,7 @@ void RenderCommandListImpl::UseProgram(const std::shared_ptr<Program>& program)
         }
     } else {
         m_pipeline_type = PipelineType::kGraphics;
-        m_graphic_pipeline_desc.program = m_program;
+        m_graphic_pipeline_desc.shaders = m_program->GetShaders();
         m_graphic_pipeline_desc.layout = m_layout;
         if (m_program->HasShader(ShaderType::kVertex)) {
             m_graphic_pipeline_desc.input = m_program->GetShader(ShaderType::kVertex)->GetInputLayouts();

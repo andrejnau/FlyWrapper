@@ -1,6 +1,7 @@
 #pragma once
 #include "Device/Device.h"
 #include "Pipeline/Pipeline.h"
+#include "RenderDevice/Program.h"
 #include "RenderDevice/RenderTypes.h"
 
 #include <map>

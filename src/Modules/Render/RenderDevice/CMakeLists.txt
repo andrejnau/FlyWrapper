@@ -1,14 +1,16 @@
 list(APPEND headers
+    BufferLayout.h
+    Program.h
+    ProgramHolder.h
     RenderDevice.h
     RenderDeviceImpl.h
-    BufferLayout.h
-    ProgramHolder.h
     ResourceStateTracker.h
 )
 
 list(APPEND sources
-    RenderDeviceImpl.cpp
     BufferLayout.cpp
+    Program.cpp
+    RenderDeviceImpl.cpp
     ResourceStateTracker.cpp
 )
 

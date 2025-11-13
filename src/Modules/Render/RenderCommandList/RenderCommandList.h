@@ -1,5 +1,6 @@
 #pragma once
 #include "Instance/QueryInterface.h"
+#include "RenderDevice/Program.h"
 #include "RenderDevice/RenderTypes.h"
 #include "Resource/Resource.h"
 
