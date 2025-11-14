@@ -20,5 +20,5 @@ private:
     const Resource* m_resource;
     std::map<std::tuple<uint32_t, uint32_t>, ResourceState> m_subresource_states;
     std::map<ResourceState, size_t> m_subresource_state_groups;
-    ResourceState m_resource_state = ResourceState::kUnknown;
+    ResourceState m_resource_state = ResourceState::kCommon;
 };

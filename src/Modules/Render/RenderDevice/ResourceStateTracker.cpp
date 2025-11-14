@@ -59,16 +59,12 @@ void ResourceStateTracker::Merge(const ResourceStateTracker& other)
 {
     if (other.HasResourceState()) {
         auto state = other.GetResourceState();
-        if (state != ResourceState::kUnknown) {
-            SetResourceState(state);
-        }
+        SetResourceState(state);
     } else {
         for (uint32_t i = 0; i < other.m_resource->GetLevelCount(); ++i) {
             for (uint32_t j = 0; j < other.m_resource->GetLayerCount(); ++j) {
                 auto state = other.GetSubresourceState(i, j);
-                if (state != ResourceState::kUnknown) {
-                    SetSubresourceState(i, j, state);
-                }
+                SetSubresourceState(i, j, state);
             }
         }
     }
