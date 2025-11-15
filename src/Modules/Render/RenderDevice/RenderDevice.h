@@ -60,6 +60,6 @@ public:
 };
 
 std::shared_ptr<RenderDevice> CreateRenderDevice(const Settings& settings,
-                                                 WindowHandle window,
+                                                 const NativeSurface& surface,
                                                  uint32_t width,
                                                  uint32_t height);

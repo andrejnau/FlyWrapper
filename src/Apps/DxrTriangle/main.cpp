@@ -13,7 +13,8 @@ int main(int argc, char* argv[])
     AppBox app("DxrTriangle", settings);
     AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
+    std::shared_ptr<RenderDevice> device =
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
     if (!device->IsDxrSupported()) {
         throw std::runtime_error("Ray Tracing is not supported");
     }

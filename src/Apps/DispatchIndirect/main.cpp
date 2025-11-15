@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     AppSize rect = app.GetAppSize();
 
     std::shared_ptr<RenderDevice> device =
-        CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
     app.SetGpuName(device->GetGpuName());
 
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();

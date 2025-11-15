@@ -18,7 +18,8 @@ int main(int argc, char* argv[])
     AppBox app("MeshShading", settings);
     AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
+    std::shared_ptr<RenderDevice> device =
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
     if (!device->IsMeshShadingSupported()) {
         throw std::runtime_error("Mesh Shading is not supported");
     }

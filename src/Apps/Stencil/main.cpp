@@ -16,7 +16,8 @@ int main(int argc, char* argv[])
     AppBox app("Stencil", settings);
     AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
+    std::shared_ptr<RenderDevice> device =
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
     app.SetGpuName(device->GetGpuName());
 
     auto dsv = device->CreateTexture(BindFlag::kDepthStencil | BindFlag::kShaderResource,

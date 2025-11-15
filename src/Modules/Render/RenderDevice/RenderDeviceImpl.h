@@ -18,7 +18,7 @@
 
 class RenderDeviceImpl : public RenderDevice {
 public:
-    RenderDeviceImpl(const Settings& settings, WindowHandle window, uint32_t width, uint32_t height);
+    RenderDeviceImpl(const Settings& settings, const NativeSurface& surface, uint32_t width, uint32_t height);
     ~RenderDeviceImpl();
 
     std::shared_ptr<RenderCommandList> CreateRenderCommandList(CommandListType type) override;
@@ -60,7 +60,7 @@ private:
     void InsertPresentBarrier();
     ResourceStateTracker& GetGlobalResourceStateTracker(Resource* resource);
 
-    WindowHandle m_window;
+    NativeSurface m_surface;
     bool m_vsync;
     uint32_t m_frame_count;
     uint32_t m_frame_index = 0;

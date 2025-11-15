@@ -17,7 +17,8 @@ int main(int argc, char* argv[])
     AppBox app("RayQuery", settings);
     AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
+    std::shared_ptr<RenderDevice> device =
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
     if (!device->IsRayQuerySupported()) {
         throw std::runtime_error("Ray Query is not supported");
     }

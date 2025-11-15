@@ -10,7 +10,8 @@ int main(int argc, char* argv[])
     AppBox app("Triangle", settings);
     AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
+    std::shared_ptr<RenderDevice> device =
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
     app.SetGpuName(device->GetGpuName());
 
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();

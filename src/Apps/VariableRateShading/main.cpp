@@ -16,7 +16,8 @@ int main(int argc, char* argv[])
     AppBox app("VariableRateShading", settings);
     AppSize rect = app.GetAppSize();
 
-    std::shared_ptr<RenderDevice> device = CreateRenderDevice(settings, app.GetNativeWindow(), rect.width(), rect.height());
+    std::shared_ptr<RenderDevice> device =
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
     if (!device->IsVariableRateShadingSupported() || device->GetShadingRateImageTileSize() == 0) {
         throw std::runtime_error("Variable rate shading is not supported");
     }

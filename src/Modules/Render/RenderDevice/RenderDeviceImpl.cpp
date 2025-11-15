@@ -4,8 +4,11 @@
 #include "Resource/ResourceBase.h"
 #include "Utilities/FormatHelper.h"
 
-RenderDeviceImpl::RenderDeviceImpl(const Settings& settings, WindowHandle window, uint32_t width, uint32_t height)
-    : m_window(window)
+RenderDeviceImpl::RenderDeviceImpl(const Settings& settings,
+                                   const NativeSurface& surface,
+                                   uint32_t width,
+                                   uint32_t height)
+    : m_surface(surface)
     , m_vsync(settings.vsync)
     , m_frame_count(kFrameCount)
     , m_width(width)
@@ -17,7 +20,7 @@ RenderDeviceImpl::RenderDeviceImpl(const Settings& settings, WindowHandle window
     m_command_queue = m_device->GetCommandQueue(CommandListType::kGraphics);
     m_object_cache = std::make_unique<ObjectCache>(*m_device);
 
-    m_swapchain = m_device->CreateSwapchain(window, m_width, m_height, m_frame_count, settings.vsync);
+    m_swapchain = m_device->CreateSwapchain(surface, m_width, m_height, m_frame_count, settings.vsync);
     m_fence = m_device->CreateFence(m_fence_value);
     for (uint32_t i = 0; i < m_frame_count; ++i) {
         m_barrier_command_lists.emplace_back(m_device->CreateCommandList(CommandListType::kGraphics));
@@ -275,7 +278,7 @@ void RenderDeviceImpl::Resize(uint32_t width, uint32_t height)
     m_width = width;
     m_height = height;
     m_swapchain.reset();
-    m_swapchain = m_device->CreateSwapchain(m_window, m_width, m_height, m_frame_count, m_vsync);
+    m_swapchain = m_device->CreateSwapchain(m_surface, m_width, m_height, m_frame_count, m_vsync);
     m_frame_index = 0;
 }
 
@@ -329,9 +332,9 @@ ResourceStateTracker& RenderDeviceImpl::GetGlobalResourceStateTracker(Resource* 
 }
 
 std::shared_ptr<RenderDevice> CreateRenderDevice(const Settings& settings,
-                                                 WindowHandle window,
+                                                 const NativeSurface& surface,
                                                  uint32_t width,
                                                  uint32_t height)
 {
-    return std::make_shared<RenderDeviceImpl>(settings, window, width, height);
+    return std::make_shared<RenderDeviceImpl>(settings, surface, width, height);
 }
