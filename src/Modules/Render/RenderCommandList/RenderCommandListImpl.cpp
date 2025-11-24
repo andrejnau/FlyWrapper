@@ -138,7 +138,7 @@ void RenderCommandListImpl::UpdateDefaultSubresource(const std::shared_ptr<Resou
                                                                          });
         }
         upload_resource->UpdateUploadBufferWithTextureData(0, row_bytes, num_bytes, data, row_pitch, depth_pitch,
-                                                           num_rows, region.texture_extent.depth);
+                                                           row_pitch, num_rows, region.texture_extent.depth);
 
         ImageBarrier(resource, region.texture_mip_level, 1, region.texture_array_layer, 1, ResourceState::kCopyDest);
         m_command_list->CopyBufferToTexture(upload_resource, resource, regions);
@@ -151,7 +151,7 @@ void RenderCommandListImpl::SetViewport(float x, float y, float width, float hei
 {
     m_viewport_width = width;
     m_viewport_height = height;
-    m_command_list->SetViewport(x, y, width, height);
+    m_command_list->SetViewport(x, y, width, height, 0.0, 1.0);
     m_command_list->SetScissorRect(x, y, width, height);
 }
 
@@ -452,7 +452,17 @@ void RenderCommandListImpl::UseProgram(const std::shared_ptr<Program>& program)
         m_graphic_pipeline_desc.shaders = m_program->GetShaders();
         m_graphic_pipeline_desc.layout = m_layout;
         if (m_program->HasShader(ShaderType::kVertex)) {
-            m_graphic_pipeline_desc.input = m_program->GetShader(ShaderType::kVertex)->GetInputLayouts();
+            decltype(auto) reflection = m_program->GetShader(ShaderType::kVertex)->GetReflection();
+            decltype(auto) input_parameters = reflection->GetInputParameters();
+            std::vector<InputLayoutDesc> input_layout_descs;
+            for (uint32_t i = 0; i < input_parameters.size(); ++i) {
+                decltype(auto) layout = input_layout_descs.emplace_back();
+                layout.slot = i;
+                layout.semantic_name = input_parameters[i].semantic_name;
+                layout.format = input_parameters[i].format;
+                layout.stride = gli::detail::bits_per_pixel(layout.format) / 8;
+            }
+            m_graphic_pipeline_desc.input = input_layout_descs;
         }
     }
     m_bound_resources.clear();
