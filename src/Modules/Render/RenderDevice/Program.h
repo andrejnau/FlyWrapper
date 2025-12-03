@@ -14,9 +14,12 @@ public:
     std::shared_ptr<Shader> GetShader(ShaderType type) const;
     const std::vector<std::shared_ptr<Shader>>& GetShaders() const;
     const std::vector<BindKey>& GetBindings() const;
+    const ResourceBindingDesc& GetResourceBinding(const BindKey& bind_key) const;
 
 private:
     std::vector<std::shared_ptr<Shader>> m_shaders;
     std::map<ShaderType, std::shared_ptr<Shader>> m_shaders_by_type;
-    std::vector<BindKey> m_bindings;
+    std::vector<BindKey> m_binding_keys;
+    std::map<BindKey, size_t> m_mapping;
+    std::vector<ResourceBindingDesc> m_bindings;
 };

@@ -5,8 +5,19 @@ Program::Program(const std::vector<std::shared_ptr<Shader>>& shaders)
 {
     for (const auto& shader : m_shaders) {
         m_shaders_by_type[shader->GetType()] = shader;
-        decltype(auto) bindings = shader->GetBindings();
-        m_bindings.insert(m_bindings.begin(), bindings.begin(), bindings.end());
+        decltype(auto) reflection = shader->GetReflection();
+        for (const auto& binding : reflection->GetBindings()) {
+            BindKey bind_key = {
+                .shader_type = shader->GetType(),
+                .view_type = binding.type,
+                .slot = binding.slot,
+                .space = binding.space,
+                .count = binding.count,
+            };
+            m_mapping[bind_key] = m_bindings.size();
+            m_bindings.emplace_back(binding);
+            m_binding_keys.emplace_back(bind_key);
+        }
     }
 }
 
@@ -31,5 +42,11 @@ const std::vector<std::shared_ptr<Shader>>& Program::GetShaders() const
 
 const std::vector<BindKey>& Program::GetBindings() const
 {
-    return m_bindings;
+    return m_binding_keys;
+}
+
+const ResourceBindingDesc& Program::GetResourceBinding(const BindKey& bind_key) const
+{
+    size_t index = m_mapping.at(bind_key);
+    return m_bindings.at(index);
 }

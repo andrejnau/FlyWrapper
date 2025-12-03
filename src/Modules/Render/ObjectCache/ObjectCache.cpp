@@ -45,7 +45,7 @@ std::shared_ptr<BindingSetLayout> ObjectCache::GetBindingSetLayout(const std::ve
 {
     auto it = m_layout_cache.find(keys);
     if (it == m_layout_cache.end()) {
-        auto layout = m_device.CreateBindingSetLayout(keys);
+        auto layout = m_device.CreateBindingSetLayout({ keys });
         it =
             m_layout_cache.emplace(std::piecewise_construct, std::forward_as_tuple(keys), std::forward_as_tuple(layout))
                 .first;
@@ -59,7 +59,7 @@ std::shared_ptr<BindingSet> ObjectCache::GetBindingSet(const std::shared_ptr<Bin
     auto it = m_binding_set_cache.find({ layout, bindings });
     if (it == m_binding_set_cache.end()) {
         auto binding_set = m_device.CreateBindingSet(layout);
-        binding_set->WriteBindings(bindings);
+        binding_set->WriteBindings({ bindings });
         it = m_binding_set_cache
                  .emplace(std::piecewise_construct, std::forward_as_tuple(layout, bindings),
                           std::forward_as_tuple(binding_set))
@@ -136,8 +136,7 @@ std::shared_ptr<View> ObjectCache::GetView(const std::shared_ptr<Program>& progr
         desc.dimension = GetViewDimension(resource);
         break;
     default:
-        decltype(auto) shader = program->GetShader(bind_key.shader_type);
-        ResourceBindingDesc binding_desc = shader->GetResourceBinding(bind_key);
+        ResourceBindingDesc binding_desc = program->GetResourceBinding(bind_key);
         desc.dimension = binding_desc.dimension;
         desc.structure_stride = binding_desc.structure_stride;
         desc.plane_slice = GetPlaneSlice(resource, bind_key.view_type, binding_desc.return_type);
