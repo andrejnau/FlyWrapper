@@ -76,8 +76,9 @@ inline auto MakeTie(const RasterizerDesc& self)
 
 inline auto MakeTie(const BlendDesc& self)
 {
-    return std::tie(self.blend_enable, self.blend_src, self.blend_dest, self.blend_op, self.blend_src_alpha,
-                    self.blend_dest_apha, self.blend_op_alpha);
+    return std::tie(self.blend_enable, self.src_color_blend_factor, self.dst_color_blend_factor, self.color_blend_op,
+                    self.src_alpha_blend_factor, self.dst_alpha_blend_factor, self.alpha_blend_op,
+                    self.color_write_mask);
 }
 
 inline auto MakeTie(const StencilOpDesc& self)

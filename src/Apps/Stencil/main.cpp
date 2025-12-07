@@ -22,11 +22,6 @@ int main(int argc, char* argv[])
 
     auto dsv = device->CreateTexture(BindFlag::kDepthStencil | BindFlag::kShaderResource,
                                      gli::format::FORMAT_D32_SFLOAT_S8_UINT_PACK64, 4, rect.width(), rect.height(), 1);
-    auto sampler = device->CreateSampler({
-        SamplerFilter::kAnisotropic,
-        SamplerTextureAddressMode::kWrap,
-        SamplerComparisonFunc::kNever,
-    });
 
     Camera camera;
     camera.SetCameraPos(glm::vec3(-3.0, 2.75, 0.0));
