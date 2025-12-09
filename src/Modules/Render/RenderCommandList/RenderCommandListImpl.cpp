@@ -606,7 +606,8 @@ void RenderCommandListImpl::BeginRenderPass(const RenderPassBeginDesc& desc)
         m_graphic_pipeline_desc.color_formats[i] = color_desc.texture->GetFormat();
         render_pass_desc.colors[i].load_op = color_desc.load_op;
         render_pass_desc.colors[i].store_op = color_desc.store_op;
-        render_pass_desc.colors[i].clear_value = color_desc.clear_color;
+        render_pass_desc.colors[i].clear_value = { color_desc.clear_color.r, color_desc.clear_color.g,
+                                                   color_desc.clear_color.b, color_desc.clear_color.a };
         render_pass_desc.sample_count = color_desc.texture->GetSampleCount();
         m_graphic_pipeline_desc.sample_count = color_desc.texture->GetSampleCount();
     }
