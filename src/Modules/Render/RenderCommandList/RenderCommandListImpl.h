@@ -86,7 +86,7 @@ public:
                     const std::vector<BufferCopyRegion>& regions) override;
     void CopyBufferToTexture(const std::shared_ptr<Resource>& src_buffer,
                              const std::shared_ptr<Resource>& dst_texture,
-                             const std::vector<BufferToTextureCopyRegion>& regions) override;
+                             const std::vector<BufferTextureCopyRegion>& regions) override;
     void CopyTexture(const std::shared_ptr<Resource>& src_texture,
                      const std::shared_ptr<Resource>& dst_texture,
                      const std::vector<TextureCopyRegion>& regions) override;

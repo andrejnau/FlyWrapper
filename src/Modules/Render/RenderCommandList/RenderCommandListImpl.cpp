@@ -57,7 +57,7 @@ void RenderCommandListImpl::CopyBuffer(const std::shared_ptr<Resource>& src_buff
 
 void RenderCommandListImpl::CopyBufferToTexture(const std::shared_ptr<Resource>& src_buffer,
                                                 const std::shared_ptr<Resource>& dst_texture,
-                                                const std::vector<BufferToTextureCopyRegion>& regions)
+                                                const std::vector<BufferTextureCopyRegion>& regions)
 {
     for (const auto& region : regions) {
         BufferBarrier(src_buffer, ResourceState::kCopySource);
@@ -118,7 +118,7 @@ void RenderCommandListImpl::UpdateDefaultSubresource(const std::shared_ptr<Resou
         break;
     }
     case ResourceType::kTexture: {
-        std::vector<BufferToTextureCopyRegion> regions;
+        std::vector<BufferTextureCopyRegion> regions;
         auto& region = regions.emplace_back();
         region.texture_mip_level = subresource % resource->GetLevelCount();
         region.texture_array_layer = subresource / resource->GetLevelCount();
