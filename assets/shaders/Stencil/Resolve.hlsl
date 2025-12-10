@@ -1,3 +1,5 @@
+#pragma dxc diagnostic ignored "-Wconversion"
+
 struct VS_OUTPUT
 {
     float4 pos       : SV_POSITION;
