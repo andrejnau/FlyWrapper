@@ -18,11 +18,11 @@ float GetTime()
 int main(int argc, char* argv[])
 {
     Settings settings = ParseArgs(argc, argv);
-    AppBox app("DispatchIndirect", settings);
+    AppBox app("DispatchIndirect", settings.api_type);
     AppSize rect = app.GetAppSize();
 
     std::shared_ptr<RenderDevice> device =
-        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width, rect.height);
     app.SetGpuName(device->GetGpuName());
 
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();

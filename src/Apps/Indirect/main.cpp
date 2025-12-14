@@ -7,11 +7,11 @@
 int main(int argc, char* argv[])
 {
     Settings settings = ParseArgs(argc, argv);
-    AppBox app("Indirect", settings);
+    AppBox app("Indirect", settings.api_type);
     AppSize rect = app.GetAppSize();
 
     std::shared_ptr<RenderDevice> device =
-        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width, rect.height);
     app.SetGpuName(device->GetGpuName());
 
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();
@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
         decltype(auto) command_list = device->CreateRenderCommandList();
         command_list->UseProgram(program);
         command_list->Attach(program.ps.cbv.Settings, program.ps.cbuffer.Settings);
-        command_list->SetViewport(0, 0, rect.width(), rect.height());
+        command_list->SetViewport(0, 0, rect.width, rect.height);
         command_list->IASetIndexBuffer(index, gli::format::FORMAT_R32_UINT_PACK32);
         command_list->IASetVertexBuffer(program.vs.ia.POSITION, pos);
         command_list->BeginRenderPass(render_pass_desc);

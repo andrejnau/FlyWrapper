@@ -13,18 +13,18 @@
 int main(int argc, char* argv[])
 {
     Settings settings = ParseArgs(argc, argv);
-    AppBox app("VariableRateShading", settings);
+    AppBox app("VariableRateShading", settings.api_type);
     AppSize rect = app.GetAppSize();
 
     std::shared_ptr<RenderDevice> device =
-        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width, rect.height);
     if (!device->IsVariableRateShadingSupported() || device->GetShadingRateImageTileSize() == 0) {
         throw std::runtime_error("Variable rate shading is not supported");
     }
     app.SetGpuName(device->GetGpuName());
 
-    auto dsv = device->CreateTexture(BindFlag::kDepthStencil, gli::format::FORMAT_D32_SFLOAT_PACK32, 1, rect.width(),
-                                     rect.height(), 1);
+    auto dsv = device->CreateTexture(BindFlag::kDepthStencil, gli::format::FORMAT_D32_SFLOAT_PACK32, 1, rect.width,
+                                     rect.height, 1);
     auto sampler = device->CreateSampler({
         .min_filter = SamplerFilter::kLinear,
         .mag_filter = SamplerFilter::kLinear,
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     camera.SetCameraPos(glm::vec3(-3.0, 2.75, 0.0));
     camera.SetCameraYaw(-178.0f);
     camera.SetCameraYaw(-1.75f);
-    camera.SetViewport(rect.width(), rect.height());
+    camera.SetViewport(rect.width, rect.height);
 
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();
 
@@ -51,8 +51,8 @@ int main(int argc, char* argv[])
 
     std::vector<ShadingRate> shading_rate;
     uint32_t tile_size = device->GetShadingRateImageTileSize();
-    uint32_t shading_rate_width = (rect.width() + tile_size - 1) / tile_size;
-    uint32_t shading_rate_height = (rect.height() + tile_size - 1) / tile_size;
+    uint32_t shading_rate_width = (rect.width + tile_size - 1) / tile_size;
+    uint32_t shading_rate_height = (rect.height + tile_size - 1) / tile_size;
     for (uint32_t y = 0; y < shading_rate_height; ++y) {
         for (uint32_t x = 0; x < shading_rate_width; ++x) {
             if (x > (shading_rate_width / 2)) {
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 
         decltype(auto) command_list = device->CreateRenderCommandList();
         command_list->UseProgram(program);
-        command_list->SetViewport(0, 0, rect.width(), rect.height());
+        command_list->SetViewport(0, 0, rect.width, rect.height);
         command_list->Attach(program.vs.cbv.ConstantBuf, program.vs.cbuffer.ConstantBuf);
         command_list->Attach(program.ps.sampler.g_sampler, sampler);
         model.ia.indices.Bind(*command_list);

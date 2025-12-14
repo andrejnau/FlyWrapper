@@ -14,11 +14,11 @@
 int main(int argc, char* argv[])
 {
     Settings settings = ParseArgs(argc, argv);
-    AppBox app("RayQuery", settings);
+    AppBox app("RayQuery", settings.api_type);
     AppSize rect = app.GetAppSize();
 
     std::shared_ptr<RenderDevice> device =
-        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width(), rect.height());
+        CreateRenderDevice(settings, app.GetNativeSurface(), rect.width, rect.height);
     if (!device->IsRayQuerySupported()) {
         throw std::runtime_error("Ray Query is not supported");
     }
@@ -27,8 +27,8 @@ int main(int argc, char* argv[])
     std::shared_ptr<RenderCommandList> upload_command_list = device->CreateRenderCommandList();
 
     // UAV
-    const static int uavWidth = rect.width();
-    const static int uavHeight = rect.height();
+    const static int uavWidth = rect.width;
+    const static int uavHeight = rect.height;
     std::shared_ptr<Resource> uav =
         device->CreateTexture(BindFlag::kUnorderedAccess | BindFlag::kShaderResource | BindFlag::kCopySource,
                               device->GetFormat(), 1, uavWidth, uavHeight);
