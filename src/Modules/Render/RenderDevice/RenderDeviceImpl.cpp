@@ -2,6 +2,7 @@
 
 #include "RenderCommandList/RenderCommandListImpl.h"
 #include "Resource/ResourceBase.h"
+#include "Utilities/Cast.h"
 #include "Utilities/FormatHelper.h"
 
 RenderDeviceImpl::RenderDeviceImpl(const Settings& settings,
@@ -190,11 +191,10 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
     size_t patch_cmds = 0;
     for (size_t c = 0; c < command_lists.size(); ++c) {
         std::vector<ResourceBarrierDesc> new_barriers;
-        decltype(auto) command_list_impl = command_lists[c]->As<RenderCommandListImpl>();
-        auto barriers = command_list_impl.GetLazyBarriers();
+        decltype(auto) command_list_impl = CastToImpl<RenderCommandListImpl>(command_lists[c]);
+        auto barriers = command_list_impl->GetLazyBarriers();
         for (auto& barrier : barriers) {
-            decltype(auto) resource_base = barrier.resource->As<ResourceBase>();
-            auto& global_state_tracker = GetGlobalResourceStateTracker(&resource_base);
+            auto& global_state_tracker = GetGlobalResourceStateTracker(barrier.resource.get());
             if (global_state_tracker.HasResourceState() && barrier.base_mip_level == 0 &&
                 barrier.level_count == barrier.resource->GetLevelCount() && barrier.base_array_layer == 0 &&
                 barrier.layer_count == barrier.resource->GetLayerCount()) {
@@ -222,7 +222,7 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
         if (!new_barriers.empty()) {
             std::shared_ptr<CommandList> tmp_cmd;
             if (c != 0 && kUseFakeClose) {
-                tmp_cmd = command_lists[c - 1]->As<RenderCommandListImpl>().GetCommandList();
+                tmp_cmd = CastToImpl<RenderCommandListImpl>(command_lists[c - 1])->GetCommandList();
             } else {
                 if (!m_fence_value_by_cmd.empty()) {
                     auto& desc = m_fence_value_by_cmd.front();
@@ -248,13 +248,13 @@ void RenderDeviceImpl::ExecuteCommandListsImpl(const std::vector<std::shared_ptr
             ++patch_cmds;
         }
 
-        auto& state_trackers = command_list_impl.GetResourceStateTrackers();
+        auto& state_trackers = command_list_impl->GetResourceStateTrackers();
         for (const auto& [resource, state_tracker] : state_trackers) {
             auto& global_state_tracker = GetGlobalResourceStateTracker(resource.get());
             global_state_tracker.Merge(state_tracker);
         }
 
-        raw_command_lists.emplace_back(command_list_impl.GetCommandList());
+        raw_command_lists.emplace_back(command_list_impl->GetCommandList());
     }
     if (kUseFakeClose) {
         for (auto& cmd : raw_command_lists) {
@@ -285,8 +285,7 @@ void RenderDeviceImpl::Resize(uint32_t width, uint32_t height)
 void RenderDeviceImpl::InsertPresentBarrier()
 {
     auto back_buffer = GetBackBuffer(GetFrameIndex());
-    decltype(auto) resource_base = back_buffer->As<ResourceBase>();
-    decltype(auto) global_state_tracker = GetGlobalResourceStateTracker(&resource_base);
+    decltype(auto) global_state_tracker = GetGlobalResourceStateTracker(back_buffer.get());
 
     ResourceBarrierDesc barrier = {};
     barrier.resource = back_buffer;

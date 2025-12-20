@@ -3,7 +3,6 @@
 #include "CommandList/CommandList.h"
 #include "CommandQueue/CommandQueue.h"
 #include "Fence/Fence.h"
-#include "Instance/QueryInterface.h"
 #include "Pipeline/Pipeline.h"
 #include "RenderCommandList/RenderCommandList.h"
 #include "RenderDevice/Program.h"
@@ -18,7 +17,7 @@
 
 inline constexpr int kFrameCount = 3;
 
-class RenderDevice : public QueryInterface {
+class RenderDevice {
 public:
     virtual ~RenderDevice() = default;
     virtual std::shared_ptr<RenderCommandList> CreateRenderCommandList(
